@@ -36,12 +36,15 @@ kotlin {
            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
        }
     }
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
         }
         commonMain.dependencies {
+            implementation(libs.androidx.sqlite.bundled)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -54,8 +57,15 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-        getByName("androidDeviceTest").dependencies {
-            implementation(libs.androidx.testRunner)
+        val databaseTest by creating {
+            dependsOn(commonTest.get())
+        }
+        getByName("iosTest").dependsOn(databaseTest)
+        getByName("androidDeviceTest") {
+            dependsOn(databaseTest)
+            dependencies {
+                implementation(libs.androidx.testRunner)
+            }
         }
     }
 }

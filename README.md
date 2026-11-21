@@ -25,6 +25,18 @@ Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 
 - Android tests: `./gradlew :shared:testAndroidHostTest`
 - iOS tests: `./gradlew :shared:iosSimulatorArm64Test`
+- Android database tests on a connected emulator: `./gradlew :shared:connectedAndroidDeviceTest`
+- The iOS test task includes the same database suite and runs on an Apple Silicon host.
+
+### Local database
+
+Android and iOS initialize a private `attendance.db` at startup. The schema stores
+members, dated events, and attendance. The app currently displays prototype data.
+
+The shared opener in `AttendanceDatabase.kt` applies ordered migrations in a transaction
+using SQLite's `user_version`. Add a migration and a fixture for the previous schema
+when changing the database. Tests use in-memory or temporary databases and never
+access the app's live data.
 
 ---
 

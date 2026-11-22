@@ -5,8 +5,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ch.verein.whosintoday.ui.PeopleViewModel
 import ch.verein.whosintoday.ui.AttendancePrototype
+import ch.verein.whosintoday.ui.PeopleViewModel
 import ch.verein.whosintoday.ui.accent
 import ch.verein.whosintoday.ui.canvas
 import ch.verein.whosintoday.ui.ink
@@ -26,10 +26,17 @@ private fun AttendanceApp(databasePath: String, sample: Boolean) {
     val people: PeopleViewModel = viewModel(key = databasePath) {
         PeopleViewModel.open(databasePath, sample)
     }
-    MaterialTheme(colorScheme = lightColorScheme(
-        primary = accent, background = canvas, surface = surface,
-        onSurface = ink, onBackground = ink, onSurfaceVariant = muted, outline = line,
-    )) {
+    MaterialTheme(
+        colorScheme = lightColorScheme(
+            primary = accent,
+            background = canvas,
+            surface = surface,
+            onSurface = ink,
+            onBackground = ink,
+            onSurfaceVariant = muted,
+            outline = line,
+        ),
+    ) {
         AttendancePrototype(people, sample)
     }
 }

@@ -4,8 +4,8 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 
-internal const val databaseName = "attendance.db"
-internal const val schemaVersion = 1
+internal const val DATABASE_NAME = "attendance.db"
+internal const val SCHEMA_VERSION = 1
 
 internal fun openAttendanceDatabase(path: String): SQLiteConnection {
     val connection = BundledSQLiteDriver().open(path)
@@ -28,12 +28,12 @@ private fun migrate(connection: SQLiteConnection) {
             check(it.step())
             it.getInt(0)
         }
-        check(version in 0..schemaVersion) {
+        check(version in 0..SCHEMA_VERSION) {
             "Unsupported attendance database version: $version"
         }
         if (version == 0) {
             createAttendanceTables(connection)
-            connection.execSQL("PRAGMA user_version = $schemaVersion")
+            connection.execSQL("PRAGMA user_version = $SCHEMA_VERSION")
         }
         connection.execSQL("COMMIT")
     } catch (failure: Throwable) {

@@ -29,8 +29,12 @@ internal fun AppBottomBar(selectedScreen: AppScreen, newEvent: Boolean, onNaviga
                     .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Label(screen.label, size = 13, weight = if (selected) 750 else 400,
-                    color = if (selected) accent else muted)
+                Label(
+                    screen.label,
+                    size = 13,
+                    weight = if (selected) 750 else 400,
+                    color = if (selected) accent else muted,
+                )
             }
         }
     }

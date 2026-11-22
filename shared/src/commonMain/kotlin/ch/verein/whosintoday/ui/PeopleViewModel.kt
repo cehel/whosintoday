@@ -36,8 +36,11 @@ internal class PeopleViewModel private constructor(
         val current = state.value
         save("Member saved.") {
             val member = current.selectedMember
-            if (member == null) repository.add(current.name)
-            else repository.rename(member.id, current.name)
+            if (member == null) {
+                repository.add(current.name)
+            } else {
+                repository.rename(member.id, current.name)
+            }
         }
     }
 

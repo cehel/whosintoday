@@ -16,6 +16,6 @@ internal fun attendanceDatabasePath(): String {
             error = null,
         ),
     ) { "Cannot create the application support directory" }
-    val path = checkNotNull(directory.URLByAppendingPathComponent(databaseName)?.path)
+    val path = checkNotNull(directory.URLByAppendingPathComponent(DATABASE_NAME)?.path)
     return path
 }

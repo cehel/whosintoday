@@ -37,17 +37,32 @@ internal fun Label(
     color: Color = ink,
     align: TextAlign? = null,
 ) {
-    Text(label, modifier, color = color, textAlign = align, style = body.copy(
-        fontSize = size.sp, lineHeight = (size * 1.5).sp, fontWeight = FontWeight(weight),
-    ))
+    Text(
+        label,
+        modifier,
+        color = color,
+        textAlign = align,
+        style = body.copy(
+            fontSize = size.sp,
+            lineHeight = (size * 1.5).sp,
+            fontWeight = FontWeight(weight),
+        ),
+    )
 }
 
 @Composable
 internal fun Heading(label: String) {
-    Text(label, color = ink, style = TextStyle(
-        fontFamily = FontFamily.Serif, fontSize = 31.sp, lineHeight = 34.sp,
-        fontWeight = FontWeight.Medium, letterSpacing = (-1).sp,
-    ))
+    Text(
+        label,
+        color = ink,
+        style = TextStyle(
+            fontFamily = FontFamily.Serif,
+            fontSize = 31.sp,
+            lineHeight = 34.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = (-1).sp,
+        ),
+    )
 }
 
 @Composable
@@ -57,8 +72,13 @@ internal fun Rule() {
 
 @Composable
 internal fun Badge(label: String) {
-    Label(label, Modifier.background(soft, CircleShape).padding(horizontal = 9.dp, vertical = 4.dp),
-        size = 12, weight = 750, color = accent)
+    Label(
+        label,
+        Modifier.background(soft, CircleShape).padding(horizontal = 9.dp, vertical = 4.dp),
+        size = 12,
+        weight = 750,
+        color = accent,
+    )
 }
 
 @Composable
@@ -94,14 +114,29 @@ internal fun CheckMark(checked: Boolean) {
         val radius = CornerRadius(3.dp.toPx())
         if (checked) {
             drawRoundRect(accent, cornerRadius = radius)
-            drawLine(Color.White, Offset(size.width * .25f, size.height * .51f),
-                Offset(size.width * .43f, size.height * .69f), 2.dp.toPx(), StrokeCap.Round)
-            drawLine(Color.White, Offset(size.width * .43f, size.height * .69f),
-                Offset(size.width * .75f, size.height * .35f), 2.dp.toPx(), StrokeCap.Round)
+            drawLine(
+                Color.White,
+                Offset(size.width * .25f, size.height * .51f),
+                Offset(size.width * .43f, size.height * .69f),
+                2.dp.toPx(),
+                StrokeCap.Round,
+            )
+            drawLine(
+                Color.White,
+                Offset(size.width * .43f, size.height * .69f),
+                Offset(size.width * .75f, size.height * .35f),
+                2.dp.toPx(),
+                StrokeCap.Round,
+            )
         } else {
             drawRoundRect(surface, cornerRadius = radius)
-            drawRoundRect(muted, Offset(stroke / 2, stroke / 2),
-                Size(size.width - stroke, size.height - stroke), radius, style = Stroke(stroke))
+            drawRoundRect(
+                muted,
+                Offset(stroke / 2, stroke / 2),
+                Size(size.width - stroke, size.height - stroke),
+                radius,
+                style = Stroke(stroke),
+            )
         }
     }
 }
@@ -111,10 +146,13 @@ internal fun Field(label: String, value: String, onChange: (String) -> Unit) {
     Label(label, Modifier.padding(top = 14.dp, bottom = 5.dp), weight = 650)
     val shape = RoundedCornerShape(9.dp)
     BasicTextField(
-        value = value, onValueChange = onChange,
+        value = value,
+        onValueChange = onChange,
         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp).background(surface, shape)
             .border(1.dp, line, shape).padding(9.dp),
-        textStyle = body.copy(color = ink), singleLine = true, cursorBrush = SolidColor(accent),
+        textStyle = body.copy(color = ink),
+        singleLine = true,
+        cursorBrush = SolidColor(accent),
     )
 }
 
@@ -135,16 +173,23 @@ internal fun Footer(label: String, hint: String = "", onClick: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(surface).padding(horizontal = gutter, vertical = 10.dp)) {
         Primary(label, onClick)
         if (hint.isNotEmpty()) {
-            Label(hint, Modifier.fillMaxWidth().padding(top = 4.dp), size = 12,
-                color = muted, align = TextAlign.Center)
+            Label(
+                hint,
+                Modifier.fillMaxWidth().padding(top = 4.dp),
+                size = 12,
+                color = muted,
+                align = TextAlign.Center,
+            )
         }
     }
 }
 
 @Composable
 internal fun TextAction(label: String, onClick: () -> Unit) {
-    Box(Modifier.heightIn(min = 44.dp).clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.CenterStart) {
+    Box(
+        Modifier.heightIn(min = 44.dp).clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.CenterStart,
+    ) {
         Label(label, weight = 700, color = accent)
     }
 }

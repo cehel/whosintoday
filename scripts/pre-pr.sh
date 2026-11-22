@@ -4,6 +4,7 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 
 ./gradlew --continue \
+    :ktlintCheck \
     :shared:testAndroidHostTest \
     :shared:connectedAndroidDeviceTest \
     :shared:iosSimulatorArm64Test

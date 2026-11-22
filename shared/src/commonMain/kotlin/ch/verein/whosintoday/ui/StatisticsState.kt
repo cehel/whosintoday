@@ -29,6 +29,7 @@ internal data class StatisticsSelection(
             history = member?.let { MemberAttendance(completed, it.id) },
             events = completed.map { EventStatistic(it.date, it.present, attendancePercentage(it.present, it.total)) },
             axisMax = largestRoster + largestRoster % 2,
+            overallPercentage = attendancePercentage(completed.sumOf(Event::present), completed.sumOf(Event::total)),
         )
     }
 }
@@ -41,6 +42,7 @@ internal data class StatisticsViewState(
     val history: MemberAttendance?,
     val events: List<EventStatistic>,
     val axisMax: Int,
+    val overallPercentage: Int?,
 )
 
 internal data class EventStatistic(val date: String, val present: Int, val percentage: Int?)

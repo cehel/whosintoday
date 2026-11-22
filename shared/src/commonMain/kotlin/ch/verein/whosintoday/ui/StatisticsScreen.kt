@@ -47,8 +47,25 @@ internal fun StatisticsScreen(
         }
     }
     when (state.panel) {
-        StatisticsPanel.Events -> EventChart(state.events, state.axisMax)
+        StatisticsPanel.Events -> {
+            state.overallPercentage?.let { OverallAttendance(it) }
+            EventChart(state.events, state.axisMax)
+        }
+
         StatisticsPanel.People -> MemberStatistics(state, onSearch, onMemberSelect)
+    }
+}
+
+@Composable
+private fun OverallAttendance(percentage: Int) {
+    Row(
+        Modifier.padding(top = 14.dp).fillMaxWidth().background(soft, RoundedCornerShape(12.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Label("Overall attendance", Modifier.weight(1f), size = 13, color = accent)
+        Label("$percentage%", size = 28, weight = 750, color = accent)
     }
 }
 
@@ -155,7 +172,7 @@ private fun EventChart(events: List<EventStatistic>, axisMax: Int) {
         }
     }
     Label(
-        "Percentages show the share of each event’s roster who attended.",
+        "Each percentage uses its event’s roster. Overall attendance uses all roster spots across completed events.",
         Modifier.padding(top = 8.dp),
         size = 13,
         color = muted,

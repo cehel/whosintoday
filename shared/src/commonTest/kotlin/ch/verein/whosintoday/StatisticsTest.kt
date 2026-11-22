@@ -27,6 +27,7 @@ class StatisticsTest {
         assertEquals(listOf(present), history.present)
         assertEquals(listOf(absent), history.absent)
         assertEquals(50, history.percentage)
+        assertEquals(75, state.overallPercentage)
         assertEquals(
             listOf(
                 EventStatistic(outsideRoster.date, 1, 100),
@@ -46,6 +47,8 @@ class StatisticsTest {
         val state = StatisticsSelection(memberId = member.id).view(listOf(empty, attended), listOf(member))
 
         assertEquals(4, state.axisMax)
+        assertEquals(67, state.overallPercentage)
+        assertNull(StatisticsSelection().view(listOf(empty), emptyList()).overallPercentage)
         assertEquals(listOf(EventStatistic(attended.date, 2, 67), EventStatistic(empty.date, 0, null)), state.events)
         assertNull(assertNotNull(state.history).percentage)
     }

@@ -17,13 +17,17 @@ import ch.verein.whosintoday.ui.surface
 
 @Composable
 @Preview
-fun App() = AttendanceApp(":memory:", sample = true)
+fun App() = AttendanceApp(":memory:", sample = true, shareCsv = null)
 
 @Composable
-fun App(databasePath: String) = AttendanceApp(databasePath, sample = false)
+fun App(databasePath: String, shareCsv: (String, ByteArray) -> Boolean) = AttendanceApp(
+    databasePath,
+    sample = false,
+    shareCsv = shareCsv,
+)
 
 @Composable
-private fun AttendanceApp(databasePath: String, sample: Boolean) {
+private fun AttendanceApp(databasePath: String, sample: Boolean, shareCsv: ((String, ByteArray) -> Boolean)?) {
     val people: PeopleViewModel = viewModel(key = "people:$databasePath") {
         PeopleViewModel.open(databasePath, sample)
     }
@@ -42,6 +46,6 @@ private fun AttendanceApp(databasePath: String, sample: Boolean) {
             outline = line,
         ),
     ) {
-        AttendancePrototype(people, attendance)
+        AttendancePrototype(people, attendance, shareCsv)
     }
 }

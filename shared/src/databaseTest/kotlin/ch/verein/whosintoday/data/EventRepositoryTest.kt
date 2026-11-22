@@ -44,6 +44,16 @@ class EventRepositoryTest {
             val completed = events.finish(date)
             assertTrue(completed.closed)
             assertEquals(completed, events.start(date))
+
+            val edited = events.setPresent(completed, originalRoster.keys.last(), true)
+            assertTrue(edited.closed)
+            assertEquals(originalRoster.keys.associateWith { true }, edited.attendance)
+        }
+
+        openAttendanceDatabase(path).use { database ->
+            val saved = EventRepository(database).list().single { it.date == date }
+            assertTrue(saved.closed)
+            assertEquals(originalRoster.keys.associateWith { true }, saved.attendance)
         }
     }
 

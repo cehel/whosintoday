@@ -12,7 +12,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Suppress("DEPRECATION") // The text clipboard API is available on both Compose targets.
 @Composable
-internal fun AttendancePrototype(peopleViewModel: PeopleViewModel, attendanceViewModel: AttendanceViewModel) {
+internal fun AttendancePrototype(
+    peopleViewModel: PeopleViewModel,
+    attendanceViewModel: AttendanceViewModel,
+    shareCsv: ((String, ByteArray) -> Boolean)?,
+) {
     val state by attendanceViewModel.viewState.collectAsStateWithLifecycle()
     val people by peopleViewModel.viewState.collectAsStateWithLifecycle()
     val sortedMembers = people.members.sortedBy { it.name.lowercase() }
@@ -62,7 +66,14 @@ internal fun AttendancePrototype(peopleViewModel: PeopleViewModel, attendanceVie
                         onSelect = peopleViewModel::selectMember,
                     )
 
-                    state.screen == AppScreen.Export -> ExportScreen(attendanceCsv(sortedMembers, state.events), state.message)
+                    state.screen == AppScreen.Export -> {
+                        val csv = attendanceCsv(sortedMembers, state.events)
+                        ExportScreen(csv, state.message)
+                        TextAction("Copy CSV") {
+                            clipboard.setText(AnnotatedString(csv))
+                            attendanceViewModel.csvCopied()
+                        }
+                    }
                 }
             }
         }
@@ -84,9 +95,8 @@ internal fun AttendancePrototype(peopleViewModel: PeopleViewModel, attendanceVie
 
             state.screen == AppScreen.Events && !state.newEvent -> Footer("+ New event", onClick = attendanceViewModel::showNewEvent)
 
-            state.screen == AppScreen.Export -> Footer("Copy sample CSV") {
-                clipboard.setText(AnnotatedString(attendanceCsv(sortedMembers, state.events)))
-                attendanceViewModel.csvCopied()
+            state.screen == AppScreen.Export && shareCsv != null -> Footer("Share CSV") {
+                attendanceViewModel.shareCsv(sortedMembers, shareCsv)
             }
         }
 

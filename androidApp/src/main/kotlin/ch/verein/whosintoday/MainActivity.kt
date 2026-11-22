@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         val databasePath = attendanceDatabasePath(applicationContext)
 
         setContent {
-            App(databasePath)
+            App(databasePath, ::shareAttendanceCsv)
         }
     }
 }

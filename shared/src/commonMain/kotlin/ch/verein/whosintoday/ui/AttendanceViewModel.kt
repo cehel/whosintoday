@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.sqlite.SQLiteException
 import ch.verein.whosintoday.data.EventRepository
 import ch.verein.whosintoday.domain.Event
+import ch.verein.whosintoday.domain.Member
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -94,7 +95,14 @@ internal class AttendanceViewModel(
     }
 
     fun csvCopied() {
-        attendance.value = attendance.value.copy(message = "Sample CSV copied.")
+        attendance.value = attendance.value.copy(message = "CSV copied.")
+    }
+
+    fun shareCsv(sortedMembers: List<Member>, share: (String, ByteArray) -> Boolean) {
+        val current = attendance.value
+        val bytes = attendanceCsv(sortedMembers, current.events).encodeToByteArray()
+        val message = if (share("attendance.csv", bytes)) "" else "Could not open sharing. Try again."
+        attendance.value = current.copy(message = message)
     }
 
     private fun writeEvent(write: () -> Event) {

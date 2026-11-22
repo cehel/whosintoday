@@ -8,7 +8,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
@@ -46,40 +49,56 @@ internal fun EventAttendanceScreen(
         Box(Modifier.fillMaxHeight().fillMaxWidth(fraction).background(accent, CircleShape))
     }
     val roster = sortedMembers.filter { it.id in current.attendance }
-    Rows(roster) { member ->
-        val checked = current.attendance[member.id] == true
-        val interaction = if (canMark) {
-            Modifier.background(if (checked) soft else surface)
-                .toggleable(checked, role = Role.Checkbox) { isPresent ->
-                    onAttendanceChange(member.id, isPresent)
-                }
-        } else {
-            Modifier
-        }
-        ListRow(interaction) {
-            Row(
-                Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
+    if (canMark) {
+        Rows(roster) { member ->
+            val checked = current.attendance[member.id] == true
+            ListRow(
+                Modifier.background(if (checked) soft else surface)
+                    .toggleable(checked, role = Role.Checkbox) { isPresent ->
+                        onAttendanceChange(member.id, isPresent)
+                    },
             ) {
-                Box(
-                    Modifier.size(30.dp).background(
-                        if (canMark && checked) surface else soft,
-                        CircleShape,
-                    ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    val initials = member.name.split(Regex("\\s+")).take(2)
-                        .joinToString("") { it.take(1) }
-                    Label(initials, size = 10, weight = 800, color = accent)
-                }
-                Label(member.name, weight = 620)
-            }
-            if (canMark) {
+                AttendanceMemberName(member, Modifier.weight(1f), if (checked) surface else soft)
                 CheckMark(checked)
-            } else {
-                Label(if (checked) "Present" else "Absent", size = 12, color = muted)
             }
         }
+    } else {
+        val (present, absent) = roster.partition { current.attendance[it.id] == true }
+        AttendanceGroup("Absent", absent)
+        AttendanceGroup("Present", present)
+    }
+}
+
+@Composable
+private fun AttendanceGroup(title: String, members: List<Member>) {
+    Label(
+        "$title · ${members.size}",
+        Modifier.padding(top = 12.dp, bottom = 5.dp).semantics { heading() },
+        size = 14,
+        weight = 720,
+    )
+    Rows(members) { member ->
+        ListRow(Modifier) {
+            AttendanceMemberName(member, Modifier.weight(1f), soft)
+        }
+    }
+}
+
+@Composable
+private fun AttendanceMemberName(member: Member, modifier: Modifier, initialsBackground: Color) {
+    Row(
+        modifier,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(30.dp).background(initialsBackground, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            val initials = member.name.split(Regex("\\s+")).take(2)
+                .joinToString("") { it.take(1) }
+            Label(initials, size = 10, weight = 800, color = accent)
+        }
+        Label(member.name, weight = 620)
     }
 }

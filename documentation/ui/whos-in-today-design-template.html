@@ -26,6 +26,8 @@
         .primary{display:block;width:100%;min-height:43px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:720;padding:9px}.primary:hover{filter:brightness(1.15)}
         .tabs{display:flex;justify-content:space-around;gap:4px;border-top:1px solid var(--line);background:var(--surface);padding:6px 10px}.tabs button{border:0;background:none;border-radius:8px;padding:7px 10px;font-size:.85rem;color:var(--muted)}.tabs button[aria-current=page]{background:var(--soft);color:var(--accent);font-weight:750}
         form{margin-top:14px}form label{font-weight:650}form input{width:100%;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px;margin:5px 0 12px}form p{margin:0 0 10px;font-size:.85rem;color:var(--muted)}.section-title{margin-top:20px;font-weight:720;font-size:.9rem}.preview-csv{white-space:pre;overflow:auto;background:var(--surface);border:1px solid var(--line);padding:12px;border-radius:10px;font-size:.78rem}.screen>p{margin-top:8px}.status{font-size:.86rem;margin-top:8px;color:var(--accent);min-height:1.25em}
+        .record,.record:hover{cursor:default;box-shadow:none}
+        .attendance-group{margin:12px 0 5px;font-size:.9rem}.attendance-group+.rows{margin-top:5px}
         @media(max-width:500px){main{width:min(100% - 28px,451px);margin-top:28px}}
     </style>
 </head>
@@ -89,13 +91,23 @@
         if (page === 'detail' && current) {
           const {present,total} = numbers(current);
           const canMark = !current.closed || editing;
-          const labels = sortedMembers().filter(m => m.id in current.attendance).map(m => {
+          const roster = sortedMembers().filter(m => m.id in current.attendance);
+          const memberRow = m => {
+            const isPresent = current.attendance[m.id];
             const initials = html(m.name.split(/\s+/).slice(0,2).map(part => [...part][0]).join(''));
             const name = '<span class="name"><span aria-hidden="true" class="initial">' + initials + '</span>' + html(m.name) + '</span>';
-            if (canMark) return '<li><label class="row">' + name + '<input id="' + prefix + 'check-' + m.id + '" type="checkbox" data-member="' + m.id + '"' + (current.attendance[m.id] ? ' checked' : '') + '></label></li>';
-            return '<li><div class="row">' + name + '<small>' + (current.attendance[m.id] ? 'Present' : 'Absent') + '</small></div></li>';
-          });
-          body = '<h3>' + shortDate(current.date) + '</h3><div class="summary"><span>' + (editing ? 'Editing attendance' : current.closed ? 'Completed event' : 'Check in attendees') + '</span><span class="count" role="status">' + present + ' / ' + total + ' present</span></div><div class="progress" aria-hidden="true"><span style="width:' + (total ? 100 * present / total : 0) + '%"></span></div><ul class="rows">' + labels.join('') + '</ul>';
+            if (canMark) return '<li><label class="row">' + name + '<input id="' + prefix + 'check-' + m.id + '" type="checkbox" data-member="' + m.id + '"' + (isPresent ? ' checked' : '') + '></label></li>';
+            return '<li><div class="row record">' + name + '</div></li>';
+          };
+          const memberList = members => '<ul class="rows">' + members.map(memberRow).join('') + '</ul>';
+          const rosterMarkup = !canMark
+            ? [false, true].map(isPresent => {
+                const group = roster.filter(m => current.attendance[m.id] === isPresent);
+                return '<h4 class="attendance-group">' + (isPresent ? 'Present' : 'Absent') + ' · ' + group.length + '</h4>' +
+                  (group.length ? memberList(group) : '');
+              }).join('')
+            : memberList(roster);
+          body = '<h3>' + shortDate(current.date) + '</h3><div class="summary"><span>' + (editing ? 'Editing attendance' : current.closed ? 'Completed event' : 'Check in attendees') + '</span><span class="count" role="status">' + present + ' / ' + total + ' present</span></div><div class="progress" aria-hidden="true"><span style="width:' + (total ? 100 * present / total : 0) + '%"></span></div>' + rosterMarkup;
           footer = current.closed && !editing ? action('edit','Edit attendance') : action('finish', editing ? 'Done editing' : 'Finish check-in', current.closed ? 'Changes apply immediately.' : 'Unchecked members count as absent when you finish.');
         } else if (page === 'events') {
           const open = events.filter(e => !e.closed).sort((a,b) => b.date.localeCompare(a.date));

@@ -14,6 +14,10 @@ class AttendanceDatabaseTest {
         openAttendanceDatabase(":memory:").use { database ->
             assertEquals(schemaVersion, database.intValue("PRAGMA user_version"))
             database.execSQL("INSERT INTO members (id, name) VALUES (1, 'Amélie')")
+            assertEquals(1, database.intValue("SELECT active FROM members WHERE id = 1"))
+            assertFailsWith<SQLiteException> {
+                database.execSQL("UPDATE members SET active = 2 WHERE id = 1")
+            }
             database.execSQL("INSERT INTO events (event_date) VALUES ('2026-11-18')")
             database.execSQL("INSERT INTO attendance (event_date, member_id) VALUES ('2026-11-18', 1)")
             assertEquals(0, database.intValue("SELECT present FROM attendance"))
@@ -52,46 +56,27 @@ class AttendanceDatabaseTest {
     }
 
     @Test
-    fun upgradesVersionOneAndPreservesExistingAttendance() = withTemporaryDatabase { path ->
-        BundledSQLiteDriver().open(path).use { database ->
-            // Frozen version-one schema. Keep independent of the production migrations.
-            database.execSQL("CREATE TABLE members (id INTEGER PRIMARY KEY, name TEXT NOT NULL CHECK (length(trim(name)) > 0))")
-            database.execSQL("CREATE TABLE events (event_date TEXT PRIMARY KEY NOT NULL, closed INTEGER NOT NULL DEFAULT 0 CHECK (closed IN (0, 1)))")
-            database.execSQL(
-                """
-                CREATE TABLE attendance (
-                    event_date TEXT NOT NULL REFERENCES events(event_date) ON DELETE CASCADE,
-                    member_id INTEGER NOT NULL REFERENCES members(id),
-                    present INTEGER NOT NULL DEFAULT 0 CHECK (present IN (0, 1)),
-                    PRIMARY KEY (event_date, member_id)
-                )
-                """.trimIndent(),
-            )
-            database.execSQL("CREATE INDEX attendance_member_id ON attendance(member_id)")
-            database.execSQL("INSERT INTO members VALUES (7, 'Noé')")
+    fun reopeningPreservesExistingAttendance() = withTemporaryDatabase { path ->
+        openAttendanceDatabase(path).use { database ->
+            database.execSQL("INSERT INTO members (id, name) VALUES (7, 'Noé')")
             database.execSQL("INSERT INTO events VALUES ('2026-11-18', 1)")
             database.execSQL("INSERT INTO attendance VALUES ('2026-11-18', 7, 1)")
-            database.execSQL("PRAGMA user_version = 1")
-        }
-
-        openAttendanceDatabase(path).use { database ->
-            assertEquals(schemaVersion, database.intValue("PRAGMA user_version"))
-            assertEquals(1, database.intValue("SELECT active FROM members WHERE id = 7 AND name = 'Noé'"))
-            assertEquals(1, database.intValue("SELECT present FROM attendance WHERE member_id = 7"))
-            assertEquals(1, database.intValue("SELECT closed FROM events WHERE event_date = '2026-11-18'"))
             database.execSQL("UPDATE members SET active = 0 WHERE id = 7")
         }
         openAttendanceDatabase(path).use { database ->
+            assertEquals(schemaVersion, database.intValue("PRAGMA user_version"))
             assertEquals(0, database.intValue("SELECT active FROM members WHERE id = 7"))
+            assertEquals(1, database.intValue("SELECT present FROM attendance WHERE member_id = 7"))
+            assertEquals(1, database.intValue("SELECT closed FROM events WHERE event_date = '2026-11-18'"))
             database.execSQL("DELETE FROM events WHERE event_date = '2026-11-18'")
             assertEquals(0, database.intValue("SELECT count(*) FROM attendance"))
         }
     }
 
     @Test
-    fun failedMigrationRollsBackSchemaAndVersion() = withTemporaryDatabase { path ->
+    fun failedInitializationRollsBackSchemaAndVersion() = withTemporaryDatabase { path ->
         BundledSQLiteDriver().open(path).use { database ->
-            // Conflict at the end of the first migration, after tables have been created.
+            // Conflict after tables have been created.
             database.execSQL("CREATE TABLE attendance_member_id (value INTEGER)")
         }
         assertFailsWith<SQLiteException> { openAttendanceDatabase(path) }

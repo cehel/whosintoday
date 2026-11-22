@@ -5,7 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 
 internal const val databaseName = "attendance.db"
-internal const val schemaVersion = 3
+internal const val schemaVersion = 1
 
 internal fun openAttendanceDatabase(path: String): SQLiteConnection {
     val connection = BundledSQLiteDriver().open(path)
@@ -31,16 +31,9 @@ private fun migrate(connection: SQLiteConnection) {
         check(version in 0..schemaVersion) {
             "Unsupported attendance database version: $version"
         }
-        for (nextVersion in (version + 1)..schemaVersion) {
-            when (nextVersion) {
-                1 -> createAttendanceTables(connection)
-                2 -> connection.execSQL(
-                    "ALTER TABLE members ADD COLUMN active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1))",
-                )
-                3 -> constrainEventDates(connection)
-                else -> error("Missing database migration to version $nextVersion")
-            }
-            connection.execSQL("PRAGMA user_version = $nextVersion")
+        if (version == 0) {
+            createAttendanceTables(connection)
+            connection.execSQL("PRAGMA user_version = $schemaVersion")
         }
         connection.execSQL("COMMIT")
     } catch (failure: Throwable) {
@@ -54,14 +47,20 @@ private fun createAttendanceTables(connection: SQLiteConnection) {
         """
         CREATE TABLE members (
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL CHECK (length(trim(name)) > 0)
+            name TEXT NOT NULL CHECK (length(trim(name)) > 0),
+            active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1))
         )
         """.trimIndent(),
     )
+    // The +0 days modifier normalizes impossible dates, and IS also rejects a NULL result.
     connection.execSQL(
         """
         CREATE TABLE events (
-            event_date TEXT PRIMARY KEY NOT NULL,
+            event_date TEXT PRIMARY KEY NOT NULL CHECK (
+                event_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+                AND substr(event_date, 1, 4) <> '0000'
+                AND date(event_date, '+0 days') IS event_date
+            ),
             closed INTEGER NOT NULL DEFAULT 0 CHECK (closed IN (0, 1))
         )
         """.trimIndent(),
@@ -76,40 +75,5 @@ private fun createAttendanceTables(connection: SQLiteConnection) {
         )
         """.trimIndent(),
     )
-    connection.execSQL("CREATE INDEX attendance_member_id ON attendance(member_id)")
-}
-
-private fun constrainEventDates(connection: SQLiteConnection) {
-    // The +0 days modifier normalizes impossible dates, and IS also rejects a NULL result.
-    connection.execSQL(
-        """
-        CREATE TABLE events_with_calendar_dates (
-            event_date TEXT PRIMARY KEY NOT NULL CHECK (
-                event_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
-                AND substr(event_date, 1, 4) <> '0000'
-                AND date(event_date, '+0 days') IS event_date
-            ),
-            closed INTEGER NOT NULL DEFAULT 0 CHECK (closed IN (0, 1))
-        )
-        """.trimIndent(),
-    )
-    connection.execSQL(
-        """
-        CREATE TABLE attendance_with_calendar_dates (
-            event_date TEXT NOT NULL REFERENCES events_with_calendar_dates(event_date) ON DELETE CASCADE,
-            member_id INTEGER NOT NULL REFERENCES members(id),
-            present INTEGER NOT NULL DEFAULT 0 CHECK (present IN (0, 1)),
-            PRIMARY KEY (event_date, member_id)
-        )
-        """.trimIndent(),
-    )
-    connection.execSQL("INSERT INTO events_with_calendar_dates SELECT event_date, closed FROM events")
-    connection.execSQL(
-        "INSERT INTO attendance_with_calendar_dates SELECT event_date, member_id, present FROM attendance",
-    )
-    connection.execSQL("DROP TABLE attendance")
-    connection.execSQL("DROP TABLE events")
-    connection.execSQL("ALTER TABLE events_with_calendar_dates RENAME TO events")
-    connection.execSQL("ALTER TABLE attendance_with_calendar_dates RENAME TO attendance")
     connection.execSQL("CREATE INDEX attendance_member_id ON attendance(member_id)")
 }

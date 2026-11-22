@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
 
 @Composable

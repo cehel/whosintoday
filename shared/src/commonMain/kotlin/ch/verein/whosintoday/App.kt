@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ch.verein.whosintoday.ui.AttendancePrototype
+import ch.verein.whosintoday.ui.AttendanceViewModel
 import ch.verein.whosintoday.ui.PeopleViewModel
 import ch.verein.whosintoday.ui.accent
 import ch.verein.whosintoday.ui.canvas
@@ -23,8 +24,12 @@ fun App(databasePath: String) = AttendanceApp(databasePath, sample = false)
 
 @Composable
 private fun AttendanceApp(databasePath: String, sample: Boolean) {
-    val people: PeopleViewModel = viewModel(key = databasePath) {
+    val people: PeopleViewModel = viewModel(key = "people:$databasePath") {
         PeopleViewModel.open(databasePath, sample)
+    }
+    // Both ViewModels live in the same store and share the connection owned by PeopleViewModel.
+    val attendance: AttendanceViewModel = viewModel(key = "attendance:$databasePath") {
+        AttendanceViewModel(people.events, sample)
     }
     MaterialTheme(
         colorScheme = lightColorScheme(
@@ -37,6 +42,6 @@ private fun AttendanceApp(databasePath: String, sample: Boolean) {
             outline = line,
         ),
     ) {
-        AttendancePrototype(people, sample)
+        AttendancePrototype(people, attendance)
     }
 }

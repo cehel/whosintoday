@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import ch.verein.whosintoday.domain.Event
 
 @Composable
 internal fun EventsScreen(events: List<Event>, onOpen: (String) -> Unit) {

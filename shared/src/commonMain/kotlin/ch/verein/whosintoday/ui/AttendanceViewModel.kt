@@ -2,9 +2,7 @@ package ch.verein.whosintoday.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.sqlite.SQLiteException
-import ch.verein.whosintoday.data.ATTENDANCE_CSV_NAME
 import ch.verein.whosintoday.data.EventRepository
-import ch.verein.whosintoday.data.writeAttendanceCsvFile
 import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,13 +24,11 @@ internal data class AttendanceViewState(
 internal class AttendanceViewModel(
     private val events: EventRepository,
     private val sample: Boolean,
-    private val csvPath: String?,
 ) : ViewModel() {
     private val attendance = MutableStateFlow(
         AttendanceViewState(events.list(), today()),
     )
     val viewState = attendance.asStateFlow()
-    val canSaveCsv = csvPath != null
 
     private fun today() = if (sample) SAMPLE_DATE else events.today()
 
@@ -102,15 +98,10 @@ internal class AttendanceViewModel(
         attendance.value = attendance.value.copy(message = "CSV copied.")
     }
 
-    fun saveCsv(sortedMembers: List<Member>) {
-        val path = csvPath ?: return
+    fun shareCsv(sortedMembers: List<Member>, share: (String, ByteArray) -> Boolean) {
         val current = attendance.value
         val bytes = attendanceCsv(sortedMembers, current.events).encodeToByteArray()
-        val message = if (writeAttendanceCsvFile(path, bytes)) {
-            "Saved $ATTENDANCE_CSV_NAME in app storage."
-        } else {
-            "Could not save the CSV file. Try again."
-        }
+        val message = if (share("attendance.csv", bytes)) "" else "Could not open sharing. Try again."
         attendance.value = current.copy(message = message)
     }
 

@@ -5,7 +5,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ch.verein.whosintoday.data.ATTENDANCE_CSV_NAME
 import ch.verein.whosintoday.ui.AttendancePrototype
 import ch.verein.whosintoday.ui.AttendanceViewModel
 import ch.verein.whosintoday.ui.PeopleViewModel
@@ -18,20 +17,23 @@ import ch.verein.whosintoday.ui.surface
 
 @Composable
 @Preview
-fun App() = AttendanceApp(":memory:", sample = true)
+fun App() = AttendanceApp(":memory:", sample = true, shareCsv = null)
 
 @Composable
-fun App(databasePath: String) = AttendanceApp(databasePath, sample = false)
+fun App(databasePath: String, shareCsv: (String, ByteArray) -> Boolean) = AttendanceApp(
+    databasePath,
+    sample = false,
+    shareCsv = shareCsv,
+)
 
 @Composable
-private fun AttendanceApp(databasePath: String, sample: Boolean) {
+private fun AttendanceApp(databasePath: String, sample: Boolean, shareCsv: ((String, ByteArray) -> Boolean)?) {
     val people: PeopleViewModel = viewModel(key = "people:$databasePath") {
         PeopleViewModel.open(databasePath, sample)
     }
     // Both ViewModels live in the same store and share the connection owned by PeopleViewModel.
     val attendance: AttendanceViewModel = viewModel(key = "attendance:$databasePath") {
-        val csvPath = if (sample) null else databasePath.substringBeforeLast('/') + "/" + ATTENDANCE_CSV_NAME
-        AttendanceViewModel(people.events, sample, csvPath)
+        AttendanceViewModel(people.events, sample)
     }
     MaterialTheme(
         colorScheme = lightColorScheme(
@@ -44,6 +46,6 @@ private fun AttendanceApp(databasePath: String, sample: Boolean) {
             outline = line,
         ),
     ) {
-        AttendancePrototype(people, attendance)
+        AttendancePrototype(people, attendance, shareCsv)
     }
 }

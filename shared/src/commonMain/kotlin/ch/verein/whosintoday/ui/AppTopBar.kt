@@ -39,7 +39,7 @@ internal fun AppTopBar(newEvent: Boolean, eventAttendance: Boolean, onBackToEven
                 }
             }
         }
-        Label("Who’s In Today", size = 13, weight = 750)
+        Label("Da-Liste", size = 13, weight = 750)
         if (newEvent && !eventAttendance) {
             TextAction("← Events", onClick = onBackToEvents)
         }

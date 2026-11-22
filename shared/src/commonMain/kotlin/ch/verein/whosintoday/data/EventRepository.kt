@@ -63,6 +63,13 @@ internal class EventRepository(private val database: SQLiteConnection) {
         readEvents(date).single()
     }
 
+    fun delete(date: String) {
+        database.prepare("DELETE FROM events WHERE event_date = ?").use {
+            it.bindText(1, date)
+            it.step()
+        }
+    }
+
     private fun readEvents(date: String? = null): List<Event> = database.prepare(
         """
         SELECT events.event_date, events.closed, attendance.member_id, attendance.present

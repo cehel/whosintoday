@@ -4,6 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +70,32 @@ internal fun EventAttendanceScreen(
         val (present, absent) = roster.partition { current.attendance[it.id] == true }
         AttendanceGroup("Absent", absent)
         AttendanceGroup("Present", present)
+    }
+}
+
+@Composable
+internal fun DeleteEventAction(
+    event: Event,
+    confirming: Boolean,
+    onRequest: () -> Unit,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    TextButton(onClick = onRequest, modifier = Modifier.padding(top = 12.dp)) {
+        Text("Delete event", color = MaterialTheme.colorScheme.error)
+    }
+    if (confirming) {
+        AlertDialog(
+            onDismissRequest = onCancel,
+            title = { Text("Delete event?") },
+            text = { Text("This will permanently delete the event on ${event.dateLabel.fullLabel} and its attendance records.") },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = onCancel) { Text("Cancel") } },
+        )
     }
 }
 

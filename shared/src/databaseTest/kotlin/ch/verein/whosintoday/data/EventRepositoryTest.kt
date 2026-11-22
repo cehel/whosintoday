@@ -58,6 +58,32 @@ class EventRepositoryTest {
     }
 
     @Test
+    fun deletingAnEventClearsItsAttendanceAndAllowsRecreatingIt() = withTemporaryDatabase { path ->
+        val date = "2026-11-18"
+        val otherDate = "2026-11-19"
+        val member = openAttendanceDatabase(path).use { database ->
+            val member = MemberRepository(database).add("Amélie")
+            val events = EventRepository(database)
+            events.setPresent(events.start(date), member.id, true)
+            events.finish(date)
+            events.setPresent(events.start(otherDate), member.id, true)
+            events.delete(date)
+            member
+        }
+
+        openAttendanceDatabase(path).use { database ->
+            val events = EventRepository(database)
+            val remaining = events.list().single()
+            assertEquals(otherDate, remaining.date)
+            assertEquals(mapOf(member.id to true), remaining.attendance)
+
+            val recreated = events.start(date)
+            assertEquals(mapOf(member.id to false), recreated.attendance)
+            assertEquals(false, recreated.closed)
+        }
+    }
+
+    @Test
     fun failedSnapshotLeavesNoEventAndCanBeRetried() {
         openAttendanceDatabase(":memory:").use { database ->
             val events = EventRepository(database)

@@ -15,6 +15,7 @@ internal data class AttendanceViewState(
     val eventDate: String? = null,
     val newEvent: Boolean = false,
     val editing: Boolean = false,
+    val confirmingDelete: Boolean = false,
     val message: String = "",
 ) {
     val currentEvent get() = events.find { it.date == eventDate }
@@ -39,6 +40,7 @@ internal class AttendanceViewModel(
             eventDate = null,
             newEvent = false,
             editing = false,
+            confirmingDelete = false,
             message = "",
         )
     }
@@ -73,6 +75,36 @@ internal class AttendanceViewModel(
             eventDate = date,
             newEvent = false,
             editing = false,
+            confirmingDelete = false,
+            message = "",
+        )
+    }
+
+    fun requestDelete() {
+        val current = attendance.value
+        if (current.currentEvent == null) return
+        attendance.value = current.copy(confirmingDelete = true, message = "")
+    }
+
+    fun cancelDelete() {
+        attendance.value = attendance.value.copy(confirmingDelete = false)
+    }
+
+    fun confirmDelete() {
+        val current = attendance.value
+        if (!current.confirmingDelete) return
+        val event = current.currentEvent ?: return
+        try {
+            events.delete(event.date)
+        } catch (_: SQLiteException) {
+            attendance.value = current.copy(confirmingDelete = false, message = "Could not delete the event. Try again.")
+            return
+        }
+        attendance.value = current.copy(
+            events = current.events.filterNot { it.date == event.date },
+            eventDate = null,
+            editing = false,
+            confirmingDelete = false,
             message = "",
         )
     }

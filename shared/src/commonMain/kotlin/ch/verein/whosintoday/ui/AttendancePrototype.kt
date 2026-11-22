@@ -45,6 +45,13 @@ internal fun AttendancePrototype(
                     current != null -> {
                         EventAttendanceScreen(current, state.editing, state.canMark, sortedMembers, attendanceViewModel::changeAttendance)
                         Status(state.message)
+                        DeleteEventAction(
+                            current,
+                            state.confirmingDelete,
+                            attendanceViewModel::requestDelete,
+                            attendanceViewModel::cancelDelete,
+                            attendanceViewModel::confirmDelete,
+                        )
                     }
 
                     state.newEvent -> NewEventScreen(

@@ -33,10 +33,10 @@ Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 Android and iOS initialize a private `attendance.db` at startup. The schema stores
 members, dated events, and attendance. The app currently displays prototype data.
 
-The shared opener in `AttendanceDatabase.kt` applies ordered migrations in a transaction
-using SQLite's `user_version`. Add a migration and a fixture for the previous schema
-when changing the database. Tests use in-memory or temporary databases and never
-access the app's live data.
+The shared opener in `AttendanceDatabase.kt` creates the initial schema in a transaction
+and records its version using SQLite's `user_version`. Add a migration and a fixture
+for the previous schema when changing a released database. Tests use in-memory or
+temporary databases and never access the app's live data.
 
 ---
 

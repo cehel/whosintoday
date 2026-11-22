@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 internal fun AttendancePrototype(
     peopleViewModel: PeopleViewModel,
     attendanceViewModel: AttendanceViewModel,
+    statisticsViewModel: StatisticsViewModel,
     shareCsv: ((String, ByteArray) -> Boolean)?,
 ) {
     val state by attendanceViewModel.viewState.collectAsStateWithLifecycle()
@@ -67,14 +68,12 @@ internal fun AttendancePrototype(
                     )
 
                     state.screen == AppScreen.Statistics -> {
-                        val statistics = remember(state.statistics, state.events, sortedMembers) {
-                            state.statistics.view(state.events, sortedMembers)
-                        }
+                        val statistics by statisticsViewModel.viewState.collectAsStateWithLifecycle()
                         StatisticsScreen(
                             statistics,
-                            attendanceViewModel::showStatisticsPanel,
-                            attendanceViewModel::searchStatisticsMember,
-                            attendanceViewModel::selectStatisticsMember,
+                            statisticsViewModel::showPanel,
+                            statisticsViewModel::searchMember,
+                            statisticsViewModel::selectMember,
                         )
                     }
 

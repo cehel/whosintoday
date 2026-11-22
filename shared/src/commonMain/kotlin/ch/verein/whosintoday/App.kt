@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ch.verein.whosintoday.ui.AttendancePrototype
 import ch.verein.whosintoday.ui.AttendanceViewModel
 import ch.verein.whosintoday.ui.PeopleViewModel
+import ch.verein.whosintoday.ui.StatisticsViewModel
 import ch.verein.whosintoday.ui.accent
 import ch.verein.whosintoday.ui.canvas
 import ch.verein.whosintoday.ui.ink
@@ -31,9 +32,12 @@ private fun AttendanceApp(databasePath: String, sample: Boolean, shareCsv: ((Str
     val people: PeopleViewModel = viewModel(key = "people:$databasePath") {
         PeopleViewModel.open(databasePath, sample)
     }
-    // Both ViewModels live in the same store and share the connection owned by PeopleViewModel.
+    // Attendance uses the connection owned by PeopleViewModel.
     val attendance: AttendanceViewModel = viewModel(key = "attendance:$databasePath") {
         AttendanceViewModel(people.events, sample)
+    }
+    val statistics: StatisticsViewModel = viewModel(key = "statistics:$databasePath") {
+        StatisticsViewModel(attendance.viewState, people.viewState)
     }
     MaterialTheme(
         colorScheme = lightColorScheme(
@@ -46,6 +50,6 @@ private fun AttendanceApp(databasePath: String, sample: Boolean, shareCsv: ((Str
             outline = line,
         ),
     ) {
-        AttendancePrototype(people, attendance, shareCsv)
+        AttendancePrototype(people, attendance, statistics, shareCsv)
     }
 }

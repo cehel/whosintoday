@@ -32,7 +32,7 @@ internal fun AttendancePrototype(
         Modifier.fillMaxSize().background(canvas)
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
     ) {
-        AppTopBar(state.newEvent) { navigate(AppScreen.Events) }
+        AppTopBar(newEvent = state.newEvent, eventAttendance = current != null) { navigate(AppScreen.Events) }
         Rule()
 
         key(state.screen, current?.date, state.newEvent) {

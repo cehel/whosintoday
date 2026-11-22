@@ -40,9 +40,10 @@
         .stats-chart{margin:10px 0 0;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
         .chart-row,.chart-scale,.chart-axis{display:grid;grid-template-columns:5.5rem minmax(0,1fr) 3rem;align-items:center;gap:6px}
         .chart-row{min-height:32px}.chart-row time,.chart-scale,.chart-axis{font-size:.72rem;color:var(--muted)}
-        .chart-track{height:14px;border-left:1px solid var(--muted);background:linear-gradient(90deg,transparent calc(50% - .5px),var(--line) 50%,transparent calc(50% + .5px));border-right:1px solid var(--line)}
+        .chart-track{height:14px;border-left:1px solid var(--muted);border-right:1px solid var(--line)}
         .chart-bar{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
-        .chart-scale span:nth-child(2){display:flex;justify-content:space-between;border-top:1px solid var(--line)}
+        .chart-scale span:nth-child(2){position:relative;display:flex;justify-content:space-between;border-top:1px solid var(--line)}
+        .chart-middle{position:absolute;transform:translateX(-50%)}
         .chart-axis{text-align:center}.chart-axis span{grid-column:2}.tabs button{padding-inline:clamp(4px,2vw,10px)}
         .chart-rate{justify-self:end;padding:2px 5px;border-radius:99px;background:var(--soft);color:var(--accent);font-size:.72rem;font-weight:750;font-variant-numeric:tabular-nums}
         .overall-card{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--accent)}
@@ -149,8 +150,11 @@
           ? '<div class="overall-card"><span>Overall attendance</span><strong>' +
             Math.round(100 * totals.present / totals.total) + '%</strong></div>'
           : '';
-        const max = Math.max(2, ...completed.map(event => numbers(event).total));
-        const axisMax = Math.ceil(max / 2) * 2;
+        const axisMax = Math.max(...completed.map(event => numbers(event).total));
+        const middleTick = Math.floor(axisMax / 2);
+        const middleLabel = middleTick > 0
+          ? '<b class="chart-middle" style="left:' + (100 * middleTick / axisMax) + '%">' + middleTick + '</b>'
+          : '';
         return summaryCard + title + '<figure class="stats-chart" aria-label="Completed events by number of people present">' +
           '<div class="chart-row"><span>Event</span></div>' +
           completed.map(event => {
@@ -158,9 +162,10 @@
             const rate = total ? Math.round(100 * present / total) + '%' : '—';
             return '<div class="chart-row"><time datetime="' + event.date + '">' + event.date + '</time>' +
               '<span class="chart-track" role="img" aria-label="' + present + ' people present"><span class="chart-bar" style="width:' +
-              (100 * present / axisMax) + '%"></span></span><span class="chart-rate">' + rate + '</span></div>';
+              (100 * present / Math.max(1, axisMax)) + '%"></span></span><span class="chart-rate">' + rate + '</span></div>';
           }).join('') +
-          '<div class="chart-scale" aria-hidden="true"><span></span><span><b>0</b><b>' + axisMax / 2 + '</b><b>' + axisMax + '</b></span></div>' +
+          '<div class="chart-scale" aria-hidden="true"><span></span><span><b>0</b>' + middleLabel +
+          (axisMax > 0 ? '<b>' + axisMax + '</b>' : '') + '</span></div>' +
           '<figcaption class="chart-axis"><span>People present</span></figcaption></figure>' +
           '<p class="stats-note">Each percentage uses its event’s roster. Overall attendance uses all roster spots across completed events.</p>' +
           '</section>';

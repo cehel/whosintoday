@@ -149,7 +149,8 @@ private fun EventChart(events: List<EventStatistic>, axisMax: Int) {
                     Modifier.weight(1f).height(14.dp).clip(RoundedCornerShape(4.dp)).background(soft)
                         .semantics { contentDescription = "${event.present} people present" },
                 ) {
-                    Box(Modifier.fillMaxHeight().fillMaxWidth(event.present.toFloat() / axisMax).background(accent))
+                    val fraction = event.present.toFloat() / axisMax.coerceAtLeast(1)
+                    Box(Modifier.fillMaxHeight().fillMaxWidth(fraction).background(accent))
                 }
                 Label(
                     event.percentage?.let { "$it%" } ?: "—",
@@ -163,9 +164,15 @@ private fun EventChart(events: List<EventStatistic>, axisMax: Int) {
         }
         Column(Modifier.fillMaxWidth().padding(start = 86.dp, end = 54.dp)) {
             Rule()
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                listOf(0, axisMax / 2, axisMax).forEach { tick ->
-                    Label(tick.toString(), size = 11, color = muted)
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                Label("0", Modifier.align(Alignment.CenterStart), size = 11, color = muted)
+                val middleTick = axisMax / 2
+                if (middleTick > 0) {
+                    val middleOffset = maxWidth * (middleTick.toFloat() / axisMax - .5f)
+                    Label(middleTick.toString(), Modifier.align(Alignment.Center).offset(x = middleOffset), size = 11, color = muted)
+                }
+                if (axisMax > 0) {
+                    Label(axisMax.toString(), Modifier.align(Alignment.CenterEnd), size = 11, color = muted)
                 }
             }
             Label("People present", Modifier.fillMaxWidth(), size = 11, color = muted, align = TextAlign.Center)

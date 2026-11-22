@@ -46,7 +46,7 @@ class StatisticsTest {
 
         val state = StatisticsSelection(memberId = member.id).view(listOf(empty, attended), listOf(member))
 
-        assertEquals(4, state.axisMax)
+        assertEquals(3, state.axisMax)
         assertEquals(67, state.overallPercentage)
         assertNull(StatisticsSelection().view(listOf(empty), emptyList()).overallPercentage)
         assertEquals(listOf(EventStatistic(attended.date, 2, 67), EventStatistic(empty.date, 0, null)), state.events)

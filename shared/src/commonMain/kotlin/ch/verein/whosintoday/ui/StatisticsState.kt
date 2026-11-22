@@ -20,7 +20,6 @@ internal data class StatisticsSelection(
         val member = sortedMembers.find { it.id == memberId }
         val name = query.trim()
         val matches = if (name.isEmpty()) emptyList() else sortedMembers.filter { it.name.contains(name, ignoreCase = true) }
-        val largestRoster = (completed.maxOfOrNull(Event::total) ?: 0).coerceAtLeast(2)
         return StatisticsViewState(
             panel = panel,
             query = query,
@@ -28,7 +27,7 @@ internal data class StatisticsSelection(
             member = member,
             history = member?.let { MemberAttendance(completed, it.id) },
             events = completed.map { EventStatistic(it.date, it.present, attendancePercentage(it.present, it.total)) },
-            axisMax = largestRoster + largestRoster % 2,
+            axisMax = completed.maxOfOrNull(Event::total) ?: 0,
             overallPercentage = attendancePercentage(completed.sumOf(Event::present), completed.sumOf(Event::total)),
         )
     }

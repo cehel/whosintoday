@@ -41,16 +41,11 @@ Jonas Berger,1,1,0
 Mia Arnold,,,1
 ```
 
-## Navigation and UI proposals
+## Navigation
 
-| Proposal | Opening screen | Navigation | Best suited to |
-| --- | --- | --- | --- |
-| A · Check-in first | Today’s checklist or **Start today’s event** | Check-in · Events · People · Export | Checking in people as they arrive |
-| B · Events first | In-progress and past events with a prominent **New event** button | Events · People · Export | Entering attendance afterwards or frequently looking up past events |
+The app opens on **Events** and provides **Events**, **People**, and **Export** tabs. Select an in-progress event to resume attendance, or use **New event** to start an event for today or an earlier date.
 
-The first version targets **Check-in first**. The organiser can start or resume today’s checklist from the opening screen. To enter attendance for an earlier date, use **Events → New event**.
-
-The [Check-in first prototype](../ui-mockup/WhoIsInToday-Check-in-first.html) uses a sample roster and demonstrates ticking attendees, adding an event, editing a name, and downloading a sample CSV. Prototype data resets on reload.
+The [Events first prototype](../ui-mockup/WhoIsInToday-Check-in-first.html) uses a sample roster and demonstrates ticking attendees, adding an event, editing a name, and downloading a sample CSV. Prototype data resets on reload.
 
 ## Technical requirements
 

@@ -1,5 +1,7 @@
 package ch.verein.whosintoday.ui
 
+import ch.verein.whosintoday.domain.Member
+
 internal fun attendanceCsv(members: List<Member>, events: List<Event>): String {
     val completed = events.filter { it.closed }.sortedBy { it.date }
     val roster = members.filter { member -> member.active || completed.any { member.id in it.attendance } }

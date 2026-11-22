@@ -6,7 +6,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class)
-internal fun initializeAttendanceDatabase() {
+internal fun attendanceDatabasePath(): String {
     val directory = checkNotNull(
         NSFileManager.defaultManager.URLForDirectory(
             NSApplicationSupportDirectory,
@@ -17,5 +17,5 @@ internal fun initializeAttendanceDatabase() {
         ),
     ) { "Cannot create the application support directory" }
     val path = checkNotNull(directory.URLByAppendingPathComponent(databaseName)?.path)
-    openAttendanceDatabase(path).use { }
+    return path
 }

@@ -4,6 +4,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import ch.verein.whosintoday.ui.PeopleViewModel
 import ch.verein.whosintoday.ui.AttendancePrototype
 import ch.verein.whosintoday.ui.accent
 import ch.verein.whosintoday.ui.canvas
@@ -14,11 +16,20 @@ import ch.verein.whosintoday.ui.surface
 
 @Composable
 @Preview
-fun App() {
+fun App() = AttendanceApp(":memory:", sample = true)
+
+@Composable
+fun App(databasePath: String) = AttendanceApp(databasePath, sample = false)
+
+@Composable
+private fun AttendanceApp(databasePath: String, sample: Boolean) {
+    val people: PeopleViewModel = viewModel(key = databasePath) {
+        PeopleViewModel.open(databasePath, sample)
+    }
     MaterialTheme(colorScheme = lightColorScheme(
         primary = accent, background = canvas, surface = surface,
         onSurface = ink, onBackground = ink, onSurfaceVariant = muted, outline = line,
     )) {
-        AttendancePrototype()
+        AttendancePrototype(people, sample)
     }
 }

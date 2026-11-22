@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import ch.verein.whosintoday.domain.Member
 
 @Composable
 internal fun CheckInScreen(
@@ -17,7 +18,7 @@ internal fun CheckInScreen(
     editing: Boolean,
     canMark: Boolean,
     sortedMembers: List<Member>,
-    onAttendanceChange: (Int, Boolean) -> Unit,
+    onAttendanceChange: (Long, Boolean) -> Unit,
 ) {
     Heading(current.dateLabel.shortLabel)
     Row(

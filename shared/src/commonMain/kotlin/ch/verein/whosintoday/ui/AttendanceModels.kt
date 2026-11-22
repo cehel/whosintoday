@@ -37,8 +37,7 @@ internal fun parseDate(value: String): EventDate? {
     return EventDate(year, month, day).takeIf { day in 1..days }
 }
 
-internal data class Member(val id: Int, val name: String, val active: Boolean = true)
-internal data class Event(val date: String, val attendance: Map<Int, Boolean>, val closed: Boolean = false) {
+internal data class Event(val date: String, val attendance: Map<Long, Boolean>, val closed: Boolean = false) {
     val dateLabel = requireNotNull(parseDate(date))
     val present get() = attendance.values.count { it }
     val total get() = attendance.size

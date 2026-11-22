@@ -38,7 +38,7 @@ internal fun AttendancePrototype(peopleViewModel: PeopleViewModel, attendanceVie
             ) {
                 when {
                     current != null -> {
-                        CheckInScreen(current, state.editing, state.canMark, sortedMembers, attendanceViewModel::changeAttendance)
+                        EventAttendanceScreen(current, state.editing, state.canMark, sortedMembers, attendanceViewModel::changeAttendance)
                         Status(state.message)
                     }
 
@@ -50,12 +50,6 @@ internal fun AttendancePrototype(peopleViewModel: PeopleViewModel, attendanceVie
                     )
 
                     state.screen == AppScreen.Events -> EventsScreen(state.events, attendanceViewModel::openEvent)
-
-                    state.screen == AppScreen.CheckIn -> {
-                        Heading("Check-in")
-                        Primary("Start today’s event", attendanceViewModel::startToday)
-                        Status(state.message)
-                    }
 
                     state.screen == AppScreen.People -> PeopleScreen(
                         member = people.selectedMember,

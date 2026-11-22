@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 internal data class AttendanceViewState(
     val events: List<Event>,
     val dateInput: String,
-    val screen: AppScreen = AppScreen.CheckIn,
+    val screen: AppScreen = AppScreen.Events,
     val eventDate: String? = null,
     val newEvent: Boolean = false,
     val editing: Boolean = false,
@@ -25,7 +25,7 @@ internal class AttendanceViewModel(
     private val sample: Boolean,
 ) : ViewModel() {
     private val attendance = MutableStateFlow(
-        today().let { date -> AttendanceViewState(events.list(), date, eventDate = date) },
+        AttendanceViewState(events.list(), today()),
     )
     val viewState = attendance.asStateFlow()
 
@@ -35,7 +35,7 @@ internal class AttendanceViewModel(
         val current = attendance.value
         attendance.value = current.copy(
             screen = screen,
-            eventDate = if (screen == AppScreen.CheckIn) today() else null,
+            eventDate = null,
             newEvent = false,
             editing = false,
             message = "",
@@ -50,12 +50,9 @@ internal class AttendanceViewModel(
         attendance.value = attendance.value.copy(dateInput = date.take(10), message = "")
     }
 
-    fun startEvent() = startEvent(attendance.value.dateInput)
-
-    fun startToday() = startEvent(today())
-
-    private fun startEvent(date: String) {
+    fun startEvent() {
         val current = attendance.value
+        val date = current.dateInput
         val event = try {
             events.start(date)
         } catch (failure: IllegalArgumentException) {
@@ -71,7 +68,7 @@ internal class AttendanceViewModel(
 
     fun openEvent(date: String) {
         attendance.value = attendance.value.copy(
-            screen = if (date == today()) AppScreen.CheckIn else AppScreen.Events,
+            screen = AppScreen.Events,
             eventDate = date,
             newEvent = false,
             editing = false,

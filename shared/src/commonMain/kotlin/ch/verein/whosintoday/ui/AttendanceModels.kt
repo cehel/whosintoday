@@ -5,7 +5,6 @@ import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.parseDate
 
 internal enum class AppScreen(val label: String) {
-    CheckIn("Check-in"),
     Events("Events"),
     People("People"),
     Export("Export"),

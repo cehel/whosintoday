@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Who’s In Today — Check-in first</title>
+    <title>Who’s In Today — Events first</title>
     <style>
         :root{color-scheme:light;font:15px/1.5 system-ui,sans-serif;color:#1d2826;background:#f1f2ed}
         *{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible,input:focus-visible{outline:3px solid #ad531f;outline-offset:3px}
@@ -34,9 +34,9 @@
         <h1>Who’s In Today</h1>
     </header>
     <section class="proposal">
-        <h2>Check-in first</h2>
-        <p>Tick attendees in the sample roster as they arrive.</p>
-        <div id="check-in-mockup" class="phone" aria-label="Check-in first prototype"></div>
+        <h2>Events first</h2>
+        <p>Open an event to record attendance, or use New event to add one.</p>
+        <div id="events-mockup" class="phone" aria-label="Events first prototype"></div>
     </section>
 </main>
 <script>
@@ -50,7 +50,7 @@
       return /[",\r\n]/.test(safe) ? '"' + safe.replaceAll('"', '""') + '"' : safe;
     };
     function mount(root) {
-      const prefix = 'check-in-';
+      const prefix = 'events-';
       const members = samples.map((name, id) => ({name, id, active:true}));
       const snapshot = present => Object.fromEntries(members.filter(m => m.active).map(m => [m.id, present.includes(m.id)]));
       const events = [
@@ -58,8 +58,8 @@
         {date:'2026-11-04', closed:true, attendance:snapshot([0,1,3,5])},
         {date:'2026-10-21', closed:true, attendance:snapshot([0,1,2,4,5])}
       ];
-      let page = 'detail';
-      let current = events[0];
+      let page = 'events';
+      let current = null;
       let editing = false;
       let memberId = null;
       let message = '';
@@ -115,7 +115,7 @@
         }
         root.innerHTML = '<div class="app-bar"><span>Who’s In Today</span>' + (page === 'new' ? '<button data-action="events">← Events</button>' : '') + '</div>' +
           '<div class="screen">' + body + '</div>' + (footer ? '<div class="actions">' + footer + '</div>' : '') +
-          '<nav class="tabs" aria-label="App navigation">' + nav('today','Check-in',page === 'detail' && current.date === sampleDate) + nav('events','Events',page === 'events' || (page === 'detail' && current.date !== sampleDate)) + nav('people','People',page === 'people') + nav('export','Export',page === 'export') + '</nav>';
+          '<nav class="tabs" aria-label="App navigation">' + nav('events','Events',page === 'events' || page === 'detail') + nav('people','People',page === 'people') + nav('export','Export',page === 'export') + '</nav>';
         if (focusId) document.getElementById(focusId)?.focus();
       }
 
@@ -173,7 +173,6 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
             return;
           }
-          case 'today': current = events.find(e => e.date === sampleDate); page = 'detail'; break;
           case 'open': current = events.find(e => e.date === button.dataset.date); page = 'detail'; break;
           case 'edit': editing = true; render(); return;
           case 'finish': current.closed = true; break;
@@ -193,7 +192,7 @@
       });
       render();
     }
-    mount(document.getElementById('check-in-mockup'));
+    mount(document.getElementById('events-mockup'));
 </script>
 </body>
 </html>

@@ -14,7 +14,7 @@ import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
 
 @Composable
-internal fun CheckInScreen(
+internal fun EventAttendanceScreen(
     current: Event,
     editing: Boolean,
     canMark: Boolean,

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254" role="img" aria-labelledby="title">
+  <title id="title">DaListe app icon</title>
+  <rect width="1254" height="1254" fill="#174939"/>
+  <g fill="#F8F7F0">
+    <rect x="255" y="336" width="297" height="304" rx="65"/>
+    <rect x="603" y="451" width="398" height="75" rx="37.5"/>
+    <rect x="596" y="786" width="348" height="72" rx="36"/>
+  </g>
+  <rect x="285" y="711" width="237" height="228" rx="50" fill="none" stroke="#F8F7F0" stroke-width="33"/>
+  <path d="M327 494 L379 544 L482 433" fill="none" stroke="#174939" stroke-width="51" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

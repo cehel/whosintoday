@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 internal fun AttendancePrototype(
     peopleViewModel: PeopleViewModel,
     attendanceViewModel: AttendanceViewModel,
+    statisticsViewModel: StatisticsViewModel,
     shareCsv: ((String, ByteArray) -> Boolean)?,
 ) {
     val state by attendanceViewModel.viewState.collectAsStateWithLifecycle()
@@ -32,7 +33,7 @@ internal fun AttendancePrototype(
         Modifier.fillMaxSize().background(canvas)
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
     ) {
-        AppTopBar(state.newEvent) { navigate(AppScreen.Events) }
+        AppTopBar(newEvent = state.newEvent, eventAttendance = current != null) { navigate(AppScreen.Events) }
         Rule()
 
         key(state.screen, current?.date, state.newEvent) {
@@ -65,6 +66,16 @@ internal fun AttendancePrototype(
                         onToggleActive = peopleViewModel::toggleSelectedMemberActive,
                         onSelect = peopleViewModel::selectMember,
                     )
+
+                    state.screen == AppScreen.Statistics -> {
+                        val statistics by statisticsViewModel.viewState.collectAsStateWithLifecycle()
+                        StatisticsScreen(
+                            statistics,
+                            statisticsViewModel::showPanel,
+                            statisticsViewModel::searchMember,
+                            statisticsViewModel::selectMember,
+                        )
+                    }
 
                     state.screen == AppScreen.Export -> {
                         val csv = attendanceCsv(sortedMembers, state.events)

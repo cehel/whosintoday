@@ -14,6 +14,7 @@
         .phone{height:650px;overflow:hidden;display:flex;flex-direction:column;border-radius:25px;background:var(--canvas);color:var(--ink);border:1px solid var(--line);box-shadow:0 12px 25px #20332c10}
         .app-bar{display:flex;justify-content:space-between;align-items:center;min-height:58px;padding:0 19px;border-bottom:1px solid var(--line);background:var(--surface);gap:8px;font-weight:750}
         .app-bar span{font-size:.85rem}.app-bar button,.text-button{border:0;background:none;color:var(--accent);font-weight:700;padding:8px 0}
+        .app-bar-detail{justify-content:flex-start;gap:14px}.app-bar-detail .back-button{width:44px;height:44px;padding:0;display:grid;place-items:center}.back-button::before{content:"";width:8px;height:8px;border:solid currentColor;border-width:0 0 2px 2px;transform:rotate(45deg)}
         .screen{flex:1;overflow:auto;padding:19px;min-height:0}.screen h3{font:500 2.05rem/1.1 Georgia,serif;letter-spacing:-.035em}
         .summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted)}.count{color:var(--accent);font-size:.81rem;font-weight:750;padding:4px 9px;background:var(--soft);border-radius:99px;white-space:nowrap}
         .progress{height:5px;background:var(--line);border-radius:5px;margin:14px 0}.progress span{display:block;background:var(--accent);height:100%;border-radius:5px}
@@ -25,6 +26,28 @@
         .primary{display:block;width:100%;min-height:43px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:720;padding:9px}.primary:hover{filter:brightness(1.15)}
         .tabs{display:flex;justify-content:space-around;gap:4px;border-top:1px solid var(--line);background:var(--surface);padding:6px 10px}.tabs button{border:0;background:none;border-radius:8px;padding:7px 10px;font-size:.85rem;color:var(--muted)}.tabs button[aria-current=page]{background:var(--soft);color:var(--accent);font-weight:750}
         form{margin-top:14px}form label{font-weight:650}form input{width:100%;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px;margin:5px 0 12px}form p{margin:0 0 10px;font-size:.85rem;color:var(--muted)}.section-title{margin-top:20px;font-weight:720;font-size:.9rem}.preview-csv{white-space:pre;overflow:auto;background:var(--surface);border:1px solid var(--line);padding:12px;border-radius:10px;font-size:.78rem}.screen>p{margin-top:8px}.status{font-size:.86rem;margin-top:8px;color:var(--accent);min-height:1.25em}
+        .record,.record:hover{cursor:default;box-shadow:none}
+        .attendance-group{margin:12px 0 5px;font-size:.9rem}.attendance-group+.rows{margin-top:5px}
+        .stats-switch{display:flex;gap:4px;margin-top:14px;padding:4px;background:var(--soft);border-radius:10px}
+        .stats-switch button{flex:1;min-height:38px;border:0;border-radius:7px;background:transparent;color:var(--accent)}
+        .stats-switch [aria-pressed=true]{background:var(--surface);font-weight:750}
+        .stats-section{margin-top:16px}.stats-section+.stats-section{margin-top:24px}
+        .stats-section h4{margin:0 0 6px;font-size:1rem}.stats-note{color:var(--muted);font-size:.8rem;margin:4px 0 8px}
+        .stats-search{display:block;width:100%;margin:5px 0 0;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+        .stats-section label{font-size:.85rem;font-weight:650}
+        .stats-profile{margin-top:12px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+        .stats-profile strong{display:block;overflow-wrap:anywhere}.stats-profile .rate{color:var(--accent);font-size:1.45rem;font-weight:750}
+        .stats-chart{margin:10px 0 0;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+        .chart-row,.chart-scale,.chart-axis{display:grid;grid-template-columns:5.5rem minmax(0,1fr) 3rem;align-items:center;gap:6px}
+        .chart-row{min-height:32px}.chart-row time,.chart-scale,.chart-axis{font-size:.72rem;color:var(--muted)}
+        .chart-track{height:14px;border-left:1px solid var(--muted);border-right:1px solid var(--line)}
+        .chart-bar{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+        .chart-scale span:nth-child(2){position:relative;display:flex;justify-content:space-between;border-top:1px solid var(--line)}
+        .chart-middle{position:absolute;transform:translateX(-50%)}
+        .chart-axis{text-align:center}.chart-axis span{grid-column:2}.tabs button{padding-inline:clamp(4px,2vw,10px)}
+        .chart-rate{justify-self:end;padding:2px 5px;border-radius:99px;background:var(--soft);color:var(--accent);font-size:.72rem;font-weight:750;font-variant-numeric:tabular-nums}
+        .overall-card{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--accent)}
+        .overall-card strong{font-size:1.85rem;line-height:1.1}.overall-card span{font-size:.85rem}
         @media(max-width:500px){main{width:min(100% - 28px,451px);margin-top:28px}}
     </style>
 </head>
@@ -35,7 +58,7 @@
     </header>
     <section class="proposal">
         <h2>Events first</h2>
-        <p>Open an event to record attendance, or use New event to add one.</p>
+        <p>Open <strong>Statistics</strong> to explore event and member attendance.</p>
         <div id="events-mockup" class="phone" aria-label="Events first prototype"></div>
     </section>
 </main>
@@ -63,6 +86,9 @@
       let editing = false;
       let memberId = null;
       let message = '';
+      let statsPanel = 'events';
+      let statsQuery = '';
+      let statsMemberId = 2;
 
       const sortedMembers = () => members.slice().sort((a,b) => a.name.localeCompare(b.name));
       const numbers = event => {
@@ -83,18 +109,89 @@
         return '<li><button class="event" data-action="open" data-date="' + event.date + '"><span><strong>' + fullDate(event.date) + '</strong><small>' + present + ' / ' + total + ' present</small></span>' +
           (event.closed ? '<span class="arrow" aria-hidden="true">›</span>' : '<span class="count">In progress</span>') + '</button></li>';
       };
+      const completedEvents = () => events.filter(event => event.closed).sort((a,b) => b.date.localeCompare(a.date));
+      const searchResults = () => {
+        const query = statsQuery.trim().toLocaleLowerCase();
+        if (!query) return '';
+        const matches = sortedMembers().filter(member => member.name.toLocaleLowerCase().includes(query));
+        if (!matches.length) return '<p class="stats-note">No matching members.</p>';
+        return '<ul class="rows">' + matches.map(member =>
+          '<li><button class="member" data-action="stats-member" data-id="' + member.id + '"><span class="name">' +
+          html(member.name) + '</span>' + (member.active ? '' : '<small>Archived</small>') + '</button></li>'
+        ).join('') + '</ul>';
+      };
+      const memberStats = completed => {
+        const member = members.find(member => member.id === statsMemberId);
+        const eligible = completed.filter(event => member.id in event.attendance);
+        const present = eligible.filter(event => event.attendance[member.id]);
+        const absent = eligible.filter(event => !event.attendance[member.id]);
+        const group = (title, events) => '<h5 class="attendance-group">' + title + ' · ' + events.length + '</h5>' +
+          (events.length ? '<ul class="rows">' + events.map(event =>
+            '<li class="row record"><time datetime="' + event.date + '">' + fullDate(event.date) + ' ' + event.date.slice(0,4) + '</time></li>'
+          ).join('') + '</ul>' : '');
+        return '<section class="stats-section"><h4>Member attendance</h4><label for="' + prefix + 'stats-search">Search by name</label>' +
+          '<input class="stats-search" type="search" id="' + prefix + 'stats-search" value="' + html(statsQuery) + '">' +
+          '<div data-stats-results aria-live="polite">' + searchResults() + '</div><div class="stats-profile">' +
+          '<strong>' + html(member.name) + (member.active ? '' : ' · Archived') + '</strong>' +
+          (eligible.length
+            ? '<span class="rate">' + Math.round(100 * present.length / eligible.length) + '%</span> present' +
+              '<p class="stats-note">Based on ' + eligible.length + ' completed events that included this member.</p>' +
+              group('Absent', absent) + group('Present', present)
+            : '<p class="stats-note">No completed events on this member’s roster.</p>') + '</div></section>';
+      };
+      const eventChart = completed => {
+        const title = '<section class="stats-section"><h4>Attendance by event</h4>';
+        if (!completed.length) return title + '<p class="stats-note">No completed events yet.</p></section>';
+        const totals = completed.reduce((sum, event) => {
+          const {present, total} = numbers(event);
+          return {present: sum.present + present, total: sum.total + total};
+        }, {present: 0, total: 0});
+        const summaryCard = totals.total
+          ? '<div class="overall-card"><span>Overall attendance</span><strong>' +
+            Math.round(100 * totals.present / totals.total) + '%</strong></div>'
+          : '';
+        const axisMax = Math.max(...completed.map(event => numbers(event).total));
+        const middleTick = Math.floor(axisMax / 2);
+        const middleLabel = middleTick > 0
+          ? '<b class="chart-middle" style="left:' + (100 * middleTick / axisMax) + '%">' + middleTick + '</b>'
+          : '';
+        return summaryCard + title + '<figure class="stats-chart" aria-label="Completed events by number of people present">' +
+          '<div class="chart-row"><span>Event</span></div>' +
+          completed.map(event => {
+            const {present, total} = numbers(event);
+            const rate = total ? Math.round(100 * present / total) + '%' : '—';
+            return '<div class="chart-row"><time datetime="' + event.date + '">' + event.date + '</time>' +
+              '<span class="chart-track" role="img" aria-label="' + present + ' people present"><span class="chart-bar" style="width:' +
+              (100 * present / Math.max(1, axisMax)) + '%"></span></span><span class="chart-rate">' + rate + '</span></div>';
+          }).join('') +
+          '<div class="chart-scale" aria-hidden="true"><span></span><span><b>0</b>' + middleLabel +
+          (axisMax > 0 ? '<b>' + axisMax + '</b>' : '') + '</span></div>' +
+          '<figcaption class="chart-axis"><span>People present</span></figcaption></figure>' +
+          '<p class="stats-note">Each percentage uses its event’s roster. Overall attendance uses all roster spots across completed events.</p>' +
+          '</section>';
+      };
       function render(focusId) {
         let body = '', footer = '';
         if (page === 'detail' && current) {
           const {present,total} = numbers(current);
           const canMark = !current.closed || editing;
-          const labels = sortedMembers().filter(m => m.id in current.attendance).map(m => {
+          const roster = sortedMembers().filter(m => m.id in current.attendance);
+          const memberRow = m => {
+            const isPresent = current.attendance[m.id];
             const initials = html(m.name.split(/\s+/).slice(0,2).map(part => [...part][0]).join(''));
             const name = '<span class="name"><span aria-hidden="true" class="initial">' + initials + '</span>' + html(m.name) + '</span>';
-            if (canMark) return '<li><label class="row">' + name + '<input id="' + prefix + 'check-' + m.id + '" type="checkbox" data-member="' + m.id + '"' + (current.attendance[m.id] ? ' checked' : '') + '></label></li>';
-            return '<li><div class="row">' + name + '<small>' + (current.attendance[m.id] ? 'Present' : 'Absent') + '</small></div></li>';
-          });
-          body = '<h3>' + shortDate(current.date) + '</h3><div class="summary"><span>' + (editing ? 'Editing attendance' : current.closed ? 'Completed event' : 'Check in attendees') + '</span><span class="count" role="status">' + present + ' / ' + total + ' present</span></div><div class="progress" aria-hidden="true"><span style="width:' + (total ? 100 * present / total : 0) + '%"></span></div><ul class="rows">' + labels.join('') + '</ul>';
+            if (canMark) return '<li><label class="row">' + name + '<input id="' + prefix + 'check-' + m.id + '" type="checkbox" data-member="' + m.id + '"' + (isPresent ? ' checked' : '') + '></label></li>';
+            return '<li><div class="row record">' + name + '</div></li>';
+          };
+          const memberList = members => '<ul class="rows">' + members.map(memberRow).join('') + '</ul>';
+          const rosterMarkup = !canMark
+            ? [false, true].map(isPresent => {
+                const group = roster.filter(m => current.attendance[m.id] === isPresent);
+                return '<h4 class="attendance-group">' + (isPresent ? 'Present' : 'Absent') + ' · ' + group.length + '</h4>' +
+                  (group.length ? memberList(group) : '');
+              }).join('')
+            : memberList(roster);
+          body = '<h3>' + shortDate(current.date) + '</h3><div class="summary"><span>' + (editing ? 'Editing attendance' : current.closed ? 'Completed event' : 'Check in attendees') + '</span><span class="count" role="status">' + present + ' / ' + total + ' present</span></div><div class="progress" aria-hidden="true"><span style="width:' + (total ? 100 * present / total : 0) + '%"></span></div>' + rosterMarkup;
           footer = current.closed && !editing ? action('edit','Edit attendance') : action('finish', editing ? 'Done editing' : 'Finish check-in', current.closed ? 'Changes apply immediately.' : 'Unchecked members count as absent when you finish.');
         } else if (page === 'events') {
           const open = events.filter(e => !e.closed).sort((a,b) => b.date.localeCompare(a.date));
@@ -109,16 +206,31 @@
           body = '<h3>People</h3><form data-form="member"><label for="' + prefix + 'name">' + (member ? 'Edit name' : 'Add a member') + '</label><input id="' + prefix + 'name" name="name" required maxlength="100" value="' + (member ? html(member.name) : '') + '"><button class="primary">' + (member ? 'Save name' : 'Add member') + '</button><div class="status" role="status">' + html(message) + '</div></form>' +
             (member ? '<button class="text-button" data-action="toggle-member">' + (member.active ? 'Archive member' : 'Restore member') + '</button>' : '') +
             '<ul class="rows">' + sortedMembers().map(m => '<li><button class="member" data-action="person" data-id="' + m.id + '"><span class="name">' + html(m.name) + '</span><small>' + (m.active ? 'Edit' : 'Archived · Edit') + '</small></button></li>').join('') + '</ul>';
+        } else if (page === 'statistics') {
+          const completed = completedEvents();
+          body = '<h3>Statistics</h3><p class="stats-note">Completed events</p>';
+          body += '<div class="stats-switch" role="group" aria-label="Statistics view">' +
+            ['events', 'people'].map(panel => '<button data-action="stats-panel" data-panel="' + panel +
+              '" aria-pressed="' + (statsPanel === panel) + '">' + (panel === 'events' ? 'Events' : 'People') + '</button>').join('') +
+            '</div>' + (statsPanel === 'events' ? eventChart(completed) : memberStats(completed));
         } else {
           body = '<h3>Export attendance</h3><p class="muted">Completed events · 1 present · 0 absent · blank outside the event roster</p><pre class="preview-csv">' + html(csv()) + '</pre><div class="status" role="status">' + html(message) + '</div>';
           footer = action('download','Download sample CSV');
         }
-        root.innerHTML = '<div class="app-bar"><span>Who’s In Today</span>' + (page === 'new' ? '<button data-action="events">← Events</button>' : '') + '</div>' +
+        const appBar = page === 'detail'
+          ? '<div class="app-bar app-bar-detail"><button class="back-button" data-action="events" aria-label="Back to Events"></button><span>Who’s In Today</span></div>'
+          : '<div class="app-bar"><span>Who’s In Today</span>' + (page === 'new' ? '<button data-action="events">← Events</button>' : '') + '</div>';
+        root.innerHTML = appBar +
           '<div class="screen">' + body + '</div>' + (footer ? '<div class="actions">' + footer + '</div>' : '') +
-          '<nav class="tabs" aria-label="App navigation">' + nav('events','Events',page === 'events' || page === 'detail') + nav('people','People',page === 'people') + nav('export','Export',page === 'export') + '</nav>';
+          '<nav class="tabs" aria-label="App navigation">' + nav('events','Events',page === 'events' || page === 'detail') + nav('people','People',page === 'people') + nav('statistics','Statistics',page === 'statistics') + nav('export','Export',page === 'export') + '</nav>';
         if (focusId) document.getElementById(focusId)?.focus();
       }
 
+      root.addEventListener('input', event => {
+        if (event.target.id !== prefix + 'stats-search') return;
+        statsQuery = event.target.value;
+        root.querySelector('[data-stats-results]').innerHTML = searchResults();
+      });
       root.addEventListener('change', event => {
         const input = event.target;
         if (!input.matches('[data-member]')) return;
@@ -178,6 +290,12 @@
           case 'finish': current.closed = true; break;
           case 'people': memberId = null; page = command; break;
           case 'person': memberId = Number(button.dataset.id); break;
+          case 'stats-member':
+            statsMemberId = Number(button.dataset.id);
+            statsQuery = '';
+            render(prefix + 'stats-search');
+            return;
+          case 'stats-panel': statsPanel = button.dataset.panel; break;
           case 'toggle-member': {
             const member = members.find(m => m.id === memberId);
             member.active = !member.active;

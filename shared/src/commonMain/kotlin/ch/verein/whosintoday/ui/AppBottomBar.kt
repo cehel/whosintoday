@@ -26,7 +26,7 @@ internal fun AppBottomBar(selectedScreen: AppScreen, newEvent: Boolean, onNaviga
                 Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(8.dp))
                     .background(if (selected) soft else surface)
                     .selectable(selected, role = Role.Tab, onClick = { onNavigate(screen) })
-                    .padding(horizontal = 10.dp),
+                    .padding(horizontal = 7.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Label(

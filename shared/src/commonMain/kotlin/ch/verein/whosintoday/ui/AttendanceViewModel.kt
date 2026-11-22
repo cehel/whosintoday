@@ -16,6 +16,7 @@ internal data class AttendanceViewState(
     val newEvent: Boolean = false,
     val editing: Boolean = false,
     val message: String = "",
+    val statistics: StatisticsSelection = StatisticsSelection(),
 ) {
     val currentEvent get() = events.find { it.date == eventDate }
     val canMark get() = currentEvent?.let { !it.closed || editing } == true
@@ -96,6 +97,21 @@ internal class AttendanceViewModel(
 
     fun csvCopied() {
         attendance.value = attendance.value.copy(message = "CSV copied.")
+    }
+
+    fun showStatisticsPanel(panel: StatisticsPanel) {
+        val current = attendance.value
+        attendance.value = current.copy(statistics = current.statistics.copy(panel = panel))
+    }
+
+    fun searchStatisticsMember(query: String) {
+        val current = attendance.value
+        attendance.value = current.copy(statistics = current.statistics.copy(query = query))
+    }
+
+    fun selectStatisticsMember(memberId: Long) {
+        val current = attendance.value
+        attendance.value = current.copy(statistics = current.statistics.copy(memberId = memberId, query = ""))
     }
 
     fun shareCsv(sortedMembers: List<Member>, share: (String, ByteArray) -> Boolean) {

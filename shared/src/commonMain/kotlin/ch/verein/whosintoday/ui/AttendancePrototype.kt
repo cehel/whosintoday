@@ -66,6 +66,18 @@ internal fun AttendancePrototype(
                         onSelect = peopleViewModel::selectMember,
                     )
 
+                    state.screen == AppScreen.Statistics -> {
+                        val statistics = remember(state.statistics, state.events, sortedMembers) {
+                            state.statistics.view(state.events, sortedMembers)
+                        }
+                        StatisticsScreen(
+                            statistics,
+                            attendanceViewModel::showStatisticsPanel,
+                            attendanceViewModel::searchStatisticsMember,
+                            attendanceViewModel::selectStatisticsMember,
+                        )
+                    }
+
                     state.screen == AppScreen.Export -> {
                         val csv = attendanceCsv(sortedMembers, state.events)
                         ExportScreen(csv, state.message)

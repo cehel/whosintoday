@@ -7,6 +7,7 @@ import ch.verein.whosintoday.domain.parseDate
 internal enum class AppScreen(val label: String) {
     Events("Events"),
     People("People"),
+    Statistics("Statistics"),
     Export("Export"),
 }
 

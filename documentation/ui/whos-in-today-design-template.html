@@ -28,6 +28,35 @@
         form{margin-top:14px}form label{font-weight:650}form input{width:100%;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px;margin:5px 0 12px}form p{margin:0 0 10px;font-size:.85rem;color:var(--muted)}.section-title{margin-top:20px;font-weight:720;font-size:.9rem}.preview-csv{white-space:pre;overflow:auto;background:var(--surface);border:1px solid var(--line);padding:12px;border-radius:10px;font-size:.78rem}.screen>p{margin-top:8px}.status{font-size:.86rem;margin-top:8px;color:var(--accent);min-height:1.25em}
         .record,.record:hover{cursor:default;box-shadow:none}
         .attendance-group{margin:12px 0 5px;font-size:.9rem}.attendance-group+.rows{margin-top:5px}
+        .design-control{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;color:var(--muted);font-size:.85rem}
+        .design-control select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px}
+        .stats-switch{display:flex;gap:4px;margin-top:14px;padding:4px;background:var(--soft);border-radius:10px}
+        .stats-switch button{flex:1;min-height:38px;border:0;border-radius:7px;background:transparent;color:var(--accent)}
+        .stats-switch [aria-pressed=true]{background:var(--surface);font-weight:750}
+        .stats-section{margin-top:16px}.stats-section+.stats-section{margin-top:24px}
+        .stats-section h4{margin:0 0 6px;font-size:1rem}.stats-note{color:var(--muted);font-size:.8rem;margin:4px 0 8px}
+        .stats-search{display:block;width:100%;margin:5px 0 0;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+        .stats-section label{font-size:.85rem;font-weight:650}
+        .stats-profile{margin-top:12px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+        .stats-profile strong{display:block;overflow-wrap:anywhere}.stats-profile .rate{color:var(--accent);font-size:1.45rem;font-weight:750}
+        .stats-chart{margin:10px 0 0;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+        .chart-row,.chart-scale{display:grid;grid-template-columns:6.6rem minmax(0,1fr) 1.5rem;align-items:center;gap:6px}
+        .chart-row{min-height:32px}.chart-row time,.chart-scale,.chart-axis{font-size:.72rem;color:var(--muted)}
+        .chart-track{height:14px;border-left:1px solid var(--muted);background:linear-gradient(90deg,transparent calc(50% - .5px),var(--line) 50%,transparent calc(50% + .5px));border-right:1px solid var(--line)}
+        .chart-bar{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}.chart-count{text-align:right;font-size:.8rem;font-weight:750}
+        .chart-scale span:nth-child(2){display:flex;justify-content:space-between;border-top:1px solid var(--line)}
+        .chart-axis{margin-left:6.6rem;text-align:center}.tabs button{padding-inline:clamp(4px,2vw,10px)}
+        .chart-with-rates{--chart-columns:5.5rem minmax(0,1fr) 3rem}
+        .chart-with-rates .chart-row,.chart-with-rates .chart-scale,.chart-with-rates .chart-axis{display:grid;grid-template-columns:var(--chart-columns);gap:6px}
+        .chart-with-rates .chart-axis{margin-left:0}.chart-with-rates .chart-axis span{grid-column:2}
+        .chart-rate{justify-self:end;padding:2px 5px;border-radius:99px;background:var(--soft);color:var(--accent);font-size:.72rem;font-weight:750;font-variant-numeric:tabular-nums}
+        .stats-hero{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--soft);display:flex;align-items:center;gap:12px;color:var(--accent)}
+        .stats-hero strong{font:500 2rem/1 Georgia,serif}.stats-hero span{font-size:.85rem}
+        .stats-cards{display:grid;gap:10px;margin-top:14px}
+        .stats-card,.stats-accordion-button{width:100%;min-height:44px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .stats-card small,.stats-accordion-button small{display:block;margin-top:2px}
+        .stats-card:hover,.stats-accordion-button:hover{border-color:var(--accent)}
+        .stats-accordion-panel{padding:0 10px 10px;border-left:1px solid var(--line)}
         @media(max-width:500px){main{width:min(100% - 28px,451px);margin-top:28px}}
     </style>
 </head>
@@ -38,7 +67,16 @@
     </header>
     <section class="proposal">
         <h2>Events first</h2>
-        <p>Open an event to record attendance, or use New event to add one.</p>
+        <p>Open <strong>Statistics</strong> to try both layouts with the same sample data.</p>
+        <label class="design-control" for="stats-layout">Statistics layout
+            <select id="stats-layout">
+                <option value="combined">Combined view</option>
+                <option value="switcher">People and Events switcher</option>
+                <option value="chart-first">Chart-first dashboard</option>
+                <option value="accordion">Expandable sections</option>
+                <option value="overview">Overview cards</option>
+            </select>
+        </label>
         <div id="events-mockup" class="phone" aria-label="Events first prototype"></div>
     </section>
 </main>
@@ -66,6 +104,12 @@
       let editing = false;
       let memberId = null;
       let message = '';
+      let statsLayout = 'combined';
+      let statsPanel = 'events';
+      let statsQuery = '';
+      let statsMemberId = 2;
+      let statsAccordion = 'people';
+      let statsDetail = null;
 
       const sortedMembers = () => members.slice().sort((a,b) => a.name.localeCompare(b.name));
       const numbers = event => {
@@ -86,6 +130,82 @@
         return '<li><button class="event" data-action="open" data-date="' + event.date + '"><span><strong>' + fullDate(event.date) + '</strong><small>' + present + ' / ' + total + ' present</small></span>' +
           (event.closed ? '<span class="arrow" aria-hidden="true">›</span>' : '<span class="count">In progress</span>') + '</button></li>';
       };
+      const completedEvents = () => events.filter(event => event.closed).sort((a,b) => b.date.localeCompare(a.date));
+      const searchResults = () => {
+        const query = statsQuery.trim().toLocaleLowerCase();
+        if (!query) return '';
+        const matches = sortedMembers().filter(member => member.name.toLocaleLowerCase().includes(query));
+        if (!matches.length) return '<p class="stats-note">No matching members.</p>';
+        return '<ul class="rows">' + matches.map(member =>
+          '<li><button class="member" data-action="stats-member" data-id="' + member.id + '"><span class="name">' +
+          html(member.name) + '</span>' + (member.active ? '' : '<small>Archived</small>') + '</button></li>'
+        ).join('') + '</ul>';
+      };
+      const memberStats = completed => {
+        const member = members.find(member => member.id === statsMemberId);
+        const eligible = completed.filter(event => member.id in event.attendance);
+        const present = eligible.filter(event => event.attendance[member.id]);
+        const absent = eligible.filter(event => !event.attendance[member.id]);
+        const group = (title, events) => '<h5 class="attendance-group">' + title + ' · ' + events.length + '</h5>' +
+          (events.length ? '<ul class="rows">' + events.map(event =>
+            '<li class="row record"><time datetime="' + event.date + '">' + fullDate(event.date) + ' ' + event.date.slice(0,4) + '</time></li>'
+          ).join('') + '</ul>' : '');
+        return '<section class="stats-section"><h4>Member attendance</h4><label for="' + prefix + 'stats-search">Search by name</label>' +
+          '<input class="stats-search" type="search" id="' + prefix + 'stats-search" value="' + html(statsQuery) + '">' +
+          '<div data-stats-results aria-live="polite">' + searchResults() + '</div><div class="stats-profile">' +
+          '<strong>' + html(member.name) + (member.active ? '' : ' · Archived') + '</strong>' +
+          (eligible.length
+            ? '<span class="rate">' + Math.round(100 * present.length / eligible.length) + '%</span> present' +
+              '<p class="stats-note">Based on ' + eligible.length + ' completed events that included this member.</p>' +
+              group('Absent', absent) + group('Present', present)
+            : '<p class="stats-note">No completed events on this member’s roster.</p>') + '</div></section>';
+      };
+      const eventChart = (completed, showRates = false) => {
+        const title = '<section class="stats-section"><h4>Attendance by event</h4>';
+        if (!completed.length) return title + '<p class="stats-note">No completed events yet.</p></section>';
+        const max = Math.max(2, ...completed.map(event => numbers(event).total));
+        const axisMax = Math.ceil(max / 2) * 2;
+        return title + '<figure class="stats-chart' + (showRates ? ' chart-with-rates' : '') +
+          '" aria-label="Completed events by number of people present">' +
+          '<div class="chart-row"><span>Event</span></div>' +
+          completed.map(event => {
+            const { present: count, total } = numbers(event);
+            const rate = total ? Math.round(100 * count / total) + '%' : '—';
+            const value = showRates
+              ? '<span class="chart-rate">' + rate + '</span>'
+              : '<span class="chart-count">' + count + '</span>';
+            return '<div class="chart-row"><time datetime="' + event.date + '">' + event.date + '</time>' +
+              '<span class="chart-track" aria-hidden="true"><span class="chart-bar" style="width:' + (100 * count / axisMax) +
+              '%"></span></span>' + value + '</div>';
+          }).join('') +
+          '<div class="chart-scale" aria-hidden="true"><span></span><span><b>0</b><b>' + axisMax / 2 + '</b><b>' + axisMax + '</b></span></div>' +
+          '<figcaption class="chart-axis"><span>People present</span></figcaption></figure>' +
+          (showRates ? '<p class="stats-note">Percentages show the share of each event’s roster who attended.</p>' : '') +
+          '</section>';
+      };
+      const statsSections = [
+        { id: 'people', title: 'Member attendance', hint: 'Search for a member and see their history', render: memberStats },
+        { id: 'events', title: 'Attendance by event', hint: 'Compare how many people attended each event', render: eventChart },
+      ];
+      const statsOverview = completed => {
+        const detail = statsSections.find(section => section.id === statsDetail);
+        if (detail) {
+          return '<button class="text-button" data-action="stats-overview">← Statistics overview</button>' + detail.render(completed);
+        }
+        return '<div class="stats-cards">' + statsSections.map(section =>
+          '<button class="stats-card" data-action="stats-detail" data-panel="' + section.id + '">' +
+          '<span><strong>' + section.title + '</strong><small>' + section.hint + '</small></span><span class="arrow" aria-hidden="true">›</span></button>'
+        ).join('') + '</div>';
+      };
+      const statsExpandable = completed => '<div class="stats-cards">' + statsSections.map(section => {
+        const expanded = section.id === statsAccordion;
+        const panelId = prefix + 'stats-panel-' + section.id;
+        return '<div><button id="' + panelId + '-button" class="stats-accordion-button" data-action="stats-accordion" data-panel="' +
+          section.id + '" aria-expanded="' + expanded + '" aria-controls="' + panelId + '">' +
+          '<span><strong>' + section.title + '</strong><small>' + section.hint + '</small></span><span aria-hidden="true">' +
+          (expanded ? '−' : '+') + '</span></button><div id="' + panelId + '"' +
+          (expanded ? ' class="stats-accordion-panel">' + section.render(completed) : ' hidden>') + '</div></div>';
+      }).join('') + '</div>';
       function render(focusId) {
         let body = '', footer = '';
         if (page === 'detail' && current) {
@@ -122,6 +242,28 @@
           body = '<h3>People</h3><form data-form="member"><label for="' + prefix + 'name">' + (member ? 'Edit name' : 'Add a member') + '</label><input id="' + prefix + 'name" name="name" required maxlength="100" value="' + (member ? html(member.name) : '') + '"><button class="primary">' + (member ? 'Save name' : 'Add member') + '</button><div class="status" role="status">' + html(message) + '</div></form>' +
             (member ? '<button class="text-button" data-action="toggle-member">' + (member.active ? 'Archive member' : 'Restore member') + '</button>' : '') +
             '<ul class="rows">' + sortedMembers().map(m => '<li><button class="member" data-action="person" data-id="' + m.id + '"><span class="name">' + html(m.name) + '</span><small>' + (m.active ? 'Edit' : 'Archived · Edit') + '</small></button></li>').join('') + '</ul>';
+        } else if (page === 'statistics') {
+          const completed = completedEvents();
+          body = '<h3>Statistics</h3><p class="stats-note">Completed events</p>';
+          if (statsLayout === 'combined') {
+            body += memberStats(completed) + eventChart(completed);
+          } else if (statsLayout === 'chart-first') {
+            if (completed.length) {
+              const average = completed.reduce((sum, event) => sum + numbers(event).present, 0) / completed.length;
+              body += '<div class="stats-hero"><strong>' + Math.round(average * 10) / 10 +
+                '</strong><span>Average people present per event</span></div>';
+            }
+            body += eventChart(completed) + memberStats(completed);
+          } else if (statsLayout === 'accordion') {
+            body += statsExpandable(completed);
+          } else if (statsLayout === 'overview') {
+            body += statsOverview(completed);
+          } else {
+            body += '<div class="stats-switch" role="group" aria-label="Statistics view">' +
+              ['events', 'people'].map(panel => '<button data-action="stats-panel" data-panel="' + panel +
+                '" aria-pressed="' + (statsPanel === panel) + '">' + (panel === 'events' ? 'Events' : 'People') + '</button>').join('') +
+              '</div>' + (statsPanel === 'events' ? eventChart(completed, true) : memberStats(completed));
+          }
         } else {
           body = '<h3>Export attendance</h3><p class="muted">Completed events · 1 present · 0 absent · blank outside the event roster</p><pre class="preview-csv">' + html(csv()) + '</pre><div class="status" role="status">' + html(message) + '</div>';
           footer = action('download','Download sample CSV');
@@ -131,10 +273,21 @@
           : '<div class="app-bar"><span>Who’s In Today</span>' + (page === 'new' ? '<button data-action="events">← Events</button>' : '') + '</div>';
         root.innerHTML = appBar +
           '<div class="screen">' + body + '</div>' + (footer ? '<div class="actions">' + footer + '</div>' : '') +
-          '<nav class="tabs" aria-label="App navigation">' + nav('events','Events',page === 'events' || page === 'detail') + nav('people','People',page === 'people') + nav('export','Export',page === 'export') + '</nav>';
+          '<nav class="tabs" aria-label="App navigation">' + nav('events','Events',page === 'events' || page === 'detail') + nav('people','People',page === 'people') + nav('statistics','Statistics',page === 'statistics') + nav('export','Export',page === 'export') + '</nav>';
         if (focusId) document.getElementById(focusId)?.focus();
       }
 
+      document.getElementById('stats-layout').addEventListener('change', event => {
+        statsLayout = event.target.value;
+        statsDetail = null;
+        page = 'statistics';
+        render();
+      });
+      root.addEventListener('input', event => {
+        if (event.target.id !== prefix + 'stats-search') return;
+        statsQuery = event.target.value;
+        root.querySelector('[data-stats-results]').innerHTML = searchResults();
+      });
       root.addEventListener('change', event => {
         const input = event.target;
         if (!input.matches('[data-member]')) return;
@@ -194,6 +347,20 @@
           case 'finish': current.closed = true; break;
           case 'people': memberId = null; page = command; break;
           case 'person': memberId = Number(button.dataset.id); break;
+          case 'stats-member':
+            statsMemberId = Number(button.dataset.id);
+            statsQuery = '';
+            render(prefix + 'stats-search');
+            return;
+          case 'stats-panel': statsPanel = button.dataset.panel; break;
+          case 'stats-accordion': {
+            const panel = button.dataset.panel;
+            statsAccordion = statsAccordion === panel ? null : panel;
+            render(prefix + 'stats-panel-' + panel + '-button');
+            return;
+          }
+          case 'stats-detail': statsDetail = button.dataset.panel; break;
+          case 'stats-overview': statsDetail = null; break;
           case 'toggle-member': {
             const member = members.find(m => m.id === memberId);
             member.active = !member.active;

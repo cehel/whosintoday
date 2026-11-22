@@ -10,12 +10,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.csv_legend
+import whosintoday.shared.generated.resources.export_attendance
 
 @Composable
-internal fun ExportScreen(csv: String, message: String) {
-    Heading("Export attendance")
+internal fun ExportScreen(csv: String, message: StringResource?) {
+    Heading(stringResource(Res.string.export_attendance))
     Label(
-        "Completed events · 1 present · 0 absent · blank outside the event roster",
+        stringResource(Res.string.csv_legend),
         color = muted,
         modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
     )

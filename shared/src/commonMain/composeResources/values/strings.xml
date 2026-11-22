@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="people">People</string>
+    <string name="add_a_member">Add a member</string>
+    <string name="edit_name">Edit name</string>
+    <string name="add_member">Add member</string>
+    <string name="save_name">Save name</string>
+    <string name="archive_member">Archive member</string>
+    <string name="restore_member">Restore member</string>
+    <string name="edit">Edit</string>
+    <string name="edit_archived_member">Archived · Edit</string>
+    <string name="percentage">%1$d%</string>
+    <string name="percentage_present">%1$s present</string>
+    <string name="statistics">Statistics</string>
+    <string name="completed_events">Completed events</string>
+    <string name="overall_attendance">Overall attendance</string>
+    <string name="member_attendance">Member attendance</string>
+    <string name="search_by_name">Search by name</string>
+    <string name="no_matching_members">No matching members.</string>
+    <string name="archived">Archived</string>
+    <string name="search_for_a_member_to_see_their_attendance">Search for a member to see their attendance.</string>
+    <string name="archived_member_name">%1$s · Archived</string>
+    <string name="no_completed_events_included_this_member">No completed events included this member.</string>
+    <string name="absent">Absent</string>
+    <string name="present">Present</string>
+    <string name="group_count">%1$s · %2$d</string>
+    <string name="attendance_by_event">Attendance by event</string>
+    <string name="no_completed_events_yet">No completed events yet.</string>
+    <string name="event">Event</string>
+    <string name="people_present">People present</string>
+    <string name="statistics_calculation">Each percentage uses its event’s roster. Overall attendance uses all roster spots across completed events.</string>
+    <string name="editing_attendance">Editing attendance</string>
+    <string name="completed_event">Completed event</string>
+    <string name="check_in_attendees">Check in attendees</string>
+    <string name="delete_event">Delete event</string>
+    <string name="delete_event_title">Delete event?</string>
+    <string name="delete_event_confirmation">This will permanently delete the event on %1$s and its attendance records.</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="copy_csv">Copy CSV</string>
+    <string name="done_editing">Done editing</string>
+    <string name="edit_attendance">Edit attendance</string>
+    <string name="finish_check_in">Finish check-in</string>
+    <string name="changes_apply_immediately">Changes apply immediately.</string>
+    <string name="unchecked_members_count_as_absent_when_you_finish">Unchecked members count as absent when you finish.</string>
+    <string name="new_event_action">+ New event</string>
+    <string name="share_csv">Share CSV</string>
+    <string name="events">Events</string>
+    <string name="in_progress">In progress</string>
+    <string name="past_events">Past events</string>
+    <string name="export_attendance">Export attendance</string>
+    <string name="csv_legend">Completed events · 1 present · 0 absent · blank outside the event roster</string>
+    <string name="back_to_events">Back to Events</string>
+    <string name="app_name">Da-Liste</string>
+    <string name="back_to_events_action">← Events</string>
+    <string name="new_event">New event</string>
+    <string name="event_date">Event date</string>
+    <string name="each_date_has_one_attendance_record">Each date has one attendance record.</string>
+    <string name="start_check_in">Start check-in</string>
+    <string name="export">Export</string>
+    <string name="date_day_month">%1$d %2$s</string>
+    <string name="date_weekday">%1$s, %2$s</string>
+    <string name="date_weekday_year">%1$s, %2$s %3$d</string>
+    <string name="attendance_count">%1$d / %2$d present</string>
+    <string-array name="month_names">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+    <string-array name="weekday_names">
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
+    <plurals name="people_present_count">
+        <item quantity="one">%1$d person present</item>
+        <item quantity="other">%1$d people present</item>
+    </plurals>
+    <plurals name="member_completed_events">
+        <item quantity="one">Based on %1$d completed event that included this member.</item>
+        <item quantity="other">Based on %1$d completed events that included this member.</item>
+    </plurals>
+    <string name="invalid_event_date">Enter a date as YYYY-MM-DD.</string>
+    <string name="empty_event_roster">Add an active member before starting an event.</string>
+    <string name="event_checklist_changed">The event or its checklist changed. Reopen the event and try again.</string>
+    <string name="empty_member_name">Enter a name.</string>
+    <string name="long_member_name">Use 100 characters or fewer.</string>
+    <string name="invalid_member_name">Enter a name without control characters.</string>
+    <string name="could_not_start_the_event">Could not start the event. Try again.</string>
+    <string name="could_not_delete_the_event">Could not delete the event. Try again.</string>
+    <string name="csv_copied">CSV copied.</string>
+    <string name="could_not_open_sharing">Could not open sharing. Try again.</string>
+    <string name="could_not_save_attendance">Could not save attendance. Try again.</string>
+    <string name="member_saved">Member saved.</string>
+    <string name="member_archived">Member archived.</string>
+    <string name="member_restored">Member restored.</string>
+    <string name="could_not_save_the_member">Could not save the member. Try again.</string>
+</resources>

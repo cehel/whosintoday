@@ -2,11 +2,24 @@ package ch.verein.whosintoday.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.sqlite.SQLiteException
+import ch.verein.whosintoday.data.EmptyEventRoster
+import ch.verein.whosintoday.data.EventChecklistChanged
 import ch.verein.whosintoday.data.EventRepository
+import ch.verein.whosintoday.data.InvalidEventDate
 import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.jetbrains.compose.resources.StringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.could_not_delete_the_event
+import whosintoday.shared.generated.resources.could_not_open_sharing
+import whosintoday.shared.generated.resources.could_not_save_attendance
+import whosintoday.shared.generated.resources.could_not_start_the_event
+import whosintoday.shared.generated.resources.csv_copied
+import whosintoday.shared.generated.resources.empty_event_roster
+import whosintoday.shared.generated.resources.event_checklist_changed
+import whosintoday.shared.generated.resources.invalid_event_date
 
 internal data class AttendanceViewState(
     val events: List<Event>,
@@ -16,7 +29,7 @@ internal data class AttendanceViewState(
     val newEvent: Boolean = false,
     val editing: Boolean = false,
     val confirmingDelete: Boolean = false,
-    val message: String = "",
+    val message: StringResource? = null,
 ) {
     val currentEvent get() = events.find { it.date == eventDate }
     val canMark get() = currentEvent?.let { !it.closed || editing } == true
@@ -41,16 +54,16 @@ internal class AttendanceViewModel(
             newEvent = false,
             editing = false,
             confirmingDelete = false,
-            message = "",
+            message = null,
         )
     }
 
     fun showNewEvent() {
-        attendance.value = attendance.value.copy(newEvent = true, dateInput = today(), message = "")
+        attendance.value = attendance.value.copy(newEvent = true, dateInput = today(), message = null)
     }
 
     fun changeDate(date: String) {
-        attendance.value = attendance.value.copy(dateInput = date.take(10), message = "")
+        attendance.value = attendance.value.copy(dateInput = date.take(10), message = null)
     }
 
     fun startEvent() {
@@ -58,11 +71,14 @@ internal class AttendanceViewModel(
         val date = current.dateInput
         val event = try {
             events.start(date)
-        } catch (failure: IllegalArgumentException) {
-            attendance.value = current.copy(message = failure.message.orEmpty())
+        } catch (_: InvalidEventDate) {
+            attendance.value = current.copy(message = Res.string.invalid_event_date)
+            return
+        } catch (_: EmptyEventRoster) {
+            attendance.value = current.copy(message = Res.string.empty_event_roster)
             return
         } catch (_: SQLiteException) {
-            attendance.value = current.copy(message = "Could not start the event. Try again.")
+            attendance.value = current.copy(message = Res.string.could_not_start_the_event)
             return
         }
         saveEvent(event)
@@ -76,14 +92,14 @@ internal class AttendanceViewModel(
             newEvent = false,
             editing = false,
             confirmingDelete = false,
-            message = "",
+            message = null,
         )
     }
 
     fun requestDelete() {
         val current = attendance.value
         if (current.currentEvent == null) return
-        attendance.value = current.copy(confirmingDelete = true, message = "")
+        attendance.value = current.copy(confirmingDelete = true, message = null)
     }
 
     fun cancelDelete() {
@@ -97,7 +113,7 @@ internal class AttendanceViewModel(
         try {
             events.delete(event.date)
         } catch (_: SQLiteException) {
-            attendance.value = current.copy(confirmingDelete = false, message = "Could not delete the event. Try again.")
+            attendance.value = current.copy(confirmingDelete = false, message = Res.string.could_not_delete_the_event)
             return
         }
         attendance.value = current.copy(
@@ -105,7 +121,7 @@ internal class AttendanceViewModel(
             eventDate = null,
             editing = false,
             confirmingDelete = false,
-            message = "",
+            message = null,
         )
     }
 
@@ -120,20 +136,20 @@ internal class AttendanceViewModel(
         val current = attendance.value
         val event = current.currentEvent ?: return
         if (event.closed) {
-            attendance.value = current.copy(editing = !current.editing, message = "")
+            attendance.value = current.copy(editing = !current.editing, message = null)
         } else {
             writeEvent { events.finish(event.date) }
         }
     }
 
     fun csvCopied() {
-        attendance.value = attendance.value.copy(message = "CSV copied.")
+        attendance.value = attendance.value.copy(message = Res.string.csv_copied)
     }
 
     fun shareCsv(sortedMembers: List<Member>, share: (String, ByteArray) -> Boolean) {
         val current = attendance.value
         val bytes = attendanceCsv(sortedMembers, current.events).encodeToByteArray()
-        val message = if (share("attendance.csv", bytes)) "" else "Could not open sharing. Try again."
+        val message = if (share("attendance.csv", bytes)) null else Res.string.could_not_open_sharing
         attendance.value = current.copy(message = message)
     }
 
@@ -142,9 +158,9 @@ internal class AttendanceViewModel(
         try {
             saveEvent(write())
         } catch (_: SQLiteException) {
-            attendance.value = current.copy(message = "Could not save attendance. Try again.")
-        } catch (failure: IllegalStateException) {
-            attendance.value = current.copy(message = failure.message.orEmpty())
+            attendance.value = current.copy(message = Res.string.could_not_save_attendance)
+        } catch (_: EventChecklistChanged) {
+            attendance.value = current.copy(message = Res.string.event_checklist_changed)
         }
     }
 
@@ -152,7 +168,7 @@ internal class AttendanceViewModel(
         val current = attendance.value
         attendance.value = current.copy(
             events = current.events.filterNot { it.date == event.date } + event,
-            message = "",
+            message = null,
         )
     }
 }

@@ -19,6 +19,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
+import org.jetbrains.compose.resources.stringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.absent
+import whosintoday.shared.generated.resources.cancel
+import whosintoday.shared.generated.resources.check_in_attendees
+import whosintoday.shared.generated.resources.completed_event
+import whosintoday.shared.generated.resources.delete
+import whosintoday.shared.generated.resources.delete_event
+import whosintoday.shared.generated.resources.delete_event_confirmation
+import whosintoday.shared.generated.resources.delete_event_title
+import whosintoday.shared.generated.resources.editing_attendance
+import whosintoday.shared.generated.resources.group_count
+import whosintoday.shared.generated.resources.present
 
 @Composable
 internal fun EventAttendanceScreen(
@@ -28,7 +41,7 @@ internal fun EventAttendanceScreen(
     sortedMembers: List<Member>,
     onAttendanceChange: (Long, Boolean) -> Unit,
 ) {
-    Heading(current.dateLabel.shortLabel)
+    Heading(current.dateLabel.shortLabel())
     Row(
         Modifier.fillMaxWidth().padding(top = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -36,14 +49,14 @@ internal fun EventAttendanceScreen(
     ) {
         Label(
             when {
-                editing -> "Editing attendance"
-                current.closed -> "Completed event"
-                else -> "Check in attendees"
+                editing -> stringResource(Res.string.editing_attendance)
+                current.closed -> stringResource(Res.string.completed_event)
+                else -> stringResource(Res.string.check_in_attendees)
             },
             color = muted,
             modifier = Modifier.weight(1f).padding(end = 10.dp),
         )
-        Badge(current.countLabel)
+        Badge(current.countLabel())
     }
     Box(
         Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 14.dp)
@@ -68,8 +81,8 @@ internal fun EventAttendanceScreen(
         }
     } else {
         val (present, absent) = roster.partition { current.attendance[it.id] == true }
-        AttendanceGroup("Absent", absent)
-        AttendanceGroup("Present", present)
+        AttendanceGroup(stringResource(Res.string.absent), absent)
+        AttendanceGroup(stringResource(Res.string.present), present)
     }
 }
 
@@ -82,19 +95,19 @@ internal fun DeleteEventAction(
     onConfirm: () -> Unit,
 ) {
     TextButton(onClick = onRequest, modifier = Modifier.padding(top = 12.dp)) {
-        Text("Delete event", color = MaterialTheme.colorScheme.error)
+        Text(stringResource(Res.string.delete_event), color = MaterialTheme.colorScheme.error)
     }
     if (confirming) {
         AlertDialog(
             onDismissRequest = onCancel,
-            title = { Text("Delete event?") },
-            text = { Text("This will permanently delete the event on ${event.dateLabel.fullLabel} and its attendance records.") },
+            title = { Text(stringResource(Res.string.delete_event_title)) },
+            text = { Text(stringResource(Res.string.delete_event_confirmation, event.dateLabel.fullLabel())) },
             confirmButton = {
                 TextButton(onClick = onConfirm) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
-            dismissButton = { TextButton(onClick = onCancel) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) } },
         )
     }
 }
@@ -102,7 +115,7 @@ internal fun DeleteEventAction(
 @Composable
 private fun AttendanceGroup(title: String, members: List<Member>) {
     Label(
-        "$title · ${members.size}",
+        stringResource(Res.string.group_count, title, members.size),
         Modifier.padding(top = 12.dp, bottom = 5.dp).semantics { heading() },
         size = 14,
         weight = 720,

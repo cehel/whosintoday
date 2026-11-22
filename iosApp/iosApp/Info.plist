@@ -6,5 +6,10 @@
 	<true/>
 	<key>CFBundleDisplayName</key>
 	<string>Da-Liste</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>de</string>
+	</array>
 </dict>
 </plist>

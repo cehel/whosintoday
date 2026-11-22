@@ -4,10 +4,14 @@ import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
 import ch.verein.whosintoday.domain.MemberAttendance
 import ch.verein.whosintoday.domain.attendancePercentage
+import org.jetbrains.compose.resources.StringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.events
+import whosintoday.shared.generated.resources.people
 
-internal enum class StatisticsPanel(val label: String) {
-    Events("Events"),
-    People("People"),
+internal enum class StatisticsPanel(val label: StringResource) {
+    Events(Res.string.events),
+    People(Res.string.people),
 }
 
 internal data class StatisticsSelection(

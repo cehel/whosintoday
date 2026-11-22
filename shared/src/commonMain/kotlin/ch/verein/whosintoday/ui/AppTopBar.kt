@@ -13,6 +13,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.app_name
+import whosintoday.shared.generated.resources.back_to_events
+import whosintoday.shared.generated.resources.back_to_events_action
 
 @Composable
 internal fun AppTopBar(newEvent: Boolean, eventAttendance: Boolean, onBackToEvents: () -> Unit) {
@@ -24,10 +29,11 @@ internal fun AppTopBar(newEvent: Boolean, eventAttendance: Boolean, onBackToEven
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (eventAttendance) {
+            val backDescription = stringResource(Res.string.back_to_events)
             Box(
                 Modifier.size(44.dp)
                     .clickable(role = Role.Button, onClick = onBackToEvents)
-                    .semantics { contentDescription = "Back to Events" },
+                    .semantics { contentDescription = backDescription },
                 contentAlignment = Alignment.Center,
             ) {
                 Canvas(Modifier.size(20.dp)) {
@@ -39,9 +45,9 @@ internal fun AppTopBar(newEvent: Boolean, eventAttendance: Boolean, onBackToEven
                 }
             }
         }
-        Label("Da-Liste", size = 13, weight = 750)
+        Label(stringResource(Res.string.app_name), size = 13, weight = 750)
         if (newEvent && !eventAttendance) {
-            TextAction("← Events", onClick = onBackToEvents)
+            TextAction(stringResource(Res.string.back_to_events_action), onClick = onBackToEvents)
         }
     }
 }

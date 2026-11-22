@@ -3,18 +3,30 @@ package ch.verein.whosintoday.ui
 import androidx.lifecycle.ViewModel
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteException
+import ch.verein.whosintoday.data.EmptyMemberName
 import ch.verein.whosintoday.data.EventRepository
+import ch.verein.whosintoday.data.InvalidMemberName
+import ch.verein.whosintoday.data.LongMemberName
 import ch.verein.whosintoday.data.MemberRepository
 import ch.verein.whosintoday.data.openAttendanceDatabase
 import ch.verein.whosintoday.domain.Member
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.jetbrains.compose.resources.StringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.could_not_save_the_member
+import whosintoday.shared.generated.resources.empty_member_name
+import whosintoday.shared.generated.resources.invalid_member_name
+import whosintoday.shared.generated.resources.long_member_name
+import whosintoday.shared.generated.resources.member_archived
+import whosintoday.shared.generated.resources.member_restored
+import whosintoday.shared.generated.resources.member_saved
 
 internal data class PeopleViewState(
     val members: List<Member>,
     val selectedMember: Member? = null,
     val name: String = "",
-    val message: String = "",
+    val message: StringResource? = null,
 )
 
 internal class PeopleViewModel private constructor(
@@ -26,7 +38,7 @@ internal class PeopleViewModel private constructor(
     val viewState = state.asStateFlow()
 
     fun selectMember(member: Member) {
-        state.value = state.value.copy(selectedMember = member, name = member.name, message = "")
+        state.value = state.value.copy(selectedMember = member, name = member.name, message = null)
     }
 
     fun changeName(name: String) {
@@ -35,7 +47,7 @@ internal class PeopleViewModel private constructor(
 
     fun saveMember() {
         val current = state.value
-        save("Member saved.") {
+        save(Res.string.member_saved) {
             val member = current.selectedMember
             if (member == null) {
                 repository.add(current.name)
@@ -47,7 +59,7 @@ internal class PeopleViewModel private constructor(
 
     fun toggleSelectedMemberActive() {
         val member = state.value.selectedMember ?: return
-        val message = if (member.active) "Member archived." else "Member restored."
+        val message = if (member.active) Res.string.member_archived else Res.string.member_restored
         save(message) { repository.setActive(member.id, !member.active) }
     }
 
@@ -55,15 +67,21 @@ internal class PeopleViewModel private constructor(
         state.value = PeopleViewState(state.value.members)
     }
 
-    private fun save(message: String, write: () -> Member) {
+    private fun save(message: StringResource, write: () -> Member) {
         val current = state.value
         val saved = try {
             write()
-        } catch (failure: IllegalArgumentException) {
-            state.value = current.copy(message = failure.message.orEmpty())
+        } catch (_: EmptyMemberName) {
+            state.value = current.copy(message = Res.string.empty_member_name)
+            return
+        } catch (_: LongMemberName) {
+            state.value = current.copy(message = Res.string.long_member_name)
+            return
+        } catch (_: InvalidMemberName) {
+            state.value = current.copy(message = Res.string.invalid_member_name)
             return
         } catch (_: SQLiteException) {
-            state.value = current.copy(message = "Could not save the member. Try again.")
+            state.value = current.copy(message = Res.string.could_not_save_the_member)
             return
         }
         val members = current.members.toMutableList()

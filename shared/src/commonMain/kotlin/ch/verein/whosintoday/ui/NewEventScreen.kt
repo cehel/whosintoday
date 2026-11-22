@@ -4,22 +4,29 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.each_date_has_one_attendance_record
+import whosintoday.shared.generated.resources.event_date
+import whosintoday.shared.generated.resources.new_event
+import whosintoday.shared.generated.resources.start_check_in
 
 @Composable
 internal fun NewEventScreen(
     dateInput: String,
-    message: String,
+    message: StringResource?,
     onDateChange: (String) -> Unit,
     onStart: () -> Unit,
 ) {
-    Heading("New event")
-    Field("Event date", dateInput, onDateChange)
+    Heading(stringResource(Res.string.new_event))
+    Field(stringResource(Res.string.event_date), dateInput, onDateChange)
     Label(
-        "Each date has one attendance record.",
+        stringResource(Res.string.each_date_has_one_attendance_record),
         size = 13,
         color = muted,
         modifier = Modifier.padding(bottom = 10.dp),
     )
-    Primary("Start check-in", onStart)
+    Primary(stringResource(Res.string.start_check_in), onStart)
     Status(message)
 }

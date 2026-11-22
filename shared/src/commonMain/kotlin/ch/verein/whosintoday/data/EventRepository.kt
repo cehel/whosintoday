@@ -13,7 +13,7 @@ internal class EventRepository(private val database: SQLiteConnection) {
     fun list(): List<Event> = readEvents()
 
     fun start(date: String): Event {
-        require(parseDate(date) != null) { "Enter a date as YYYY-MM-DD." }
+        if (parseDate(date) == null) throw InvalidEventDate()
         return database.writeTransaction {
             val existing = readEvents(date).singleOrNull()
             if (existing != null) return@writeTransaction existing
@@ -30,7 +30,7 @@ internal class EventRepository(private val database: SQLiteConnection) {
             }
 
             val event = readEvents(date).single()
-            require(event.attendance.isNotEmpty()) { "Add an active member before starting an event." }
+            if (event.attendance.isEmpty()) throw EmptyEventRoster()
             event
         }
     }
@@ -49,7 +49,7 @@ internal class EventRepository(private val database: SQLiteConnection) {
             it.bindLong(3, memberId)
             it.bindText(4, event.date)
             it.bindLong(5, if (event.closed) 1L else 0L)
-            check(it.step()) { "The event or its checklist changed. Reopen the event and try again." }
+            if (!it.step()) throw EventChecklistChanged()
             check(!it.step())
         }
         readEvents(event.date).single()
@@ -102,3 +102,9 @@ internal class EventRepository(private val database: SQLiteConnection) {
         events
     }
 }
+
+internal class InvalidEventDate : IllegalArgumentException()
+
+internal class EmptyEventRoster : IllegalArgumentException()
+
+internal class EventChecklistChanged : IllegalStateException()

@@ -19,6 +19,32 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ch.verein.whosintoday.domain.Event
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import whosintoday.shared.generated.resources.Res
+import whosintoday.shared.generated.resources.absent
+import whosintoday.shared.generated.resources.archived
+import whosintoday.shared.generated.resources.archived_member_name
+import whosintoday.shared.generated.resources.attendance_by_event
+import whosintoday.shared.generated.resources.completed_events
+import whosintoday.shared.generated.resources.event
+import whosintoday.shared.generated.resources.group_count
+import whosintoday.shared.generated.resources.member_attendance
+import whosintoday.shared.generated.resources.member_completed_events
+import whosintoday.shared.generated.resources.no_completed_events_included_this_member
+import whosintoday.shared.generated.resources.no_completed_events_yet
+import whosintoday.shared.generated.resources.no_matching_members
+import whosintoday.shared.generated.resources.overall_attendance
+import whosintoday.shared.generated.resources.people_present
+import whosintoday.shared.generated.resources.people_present_count
+import whosintoday.shared.generated.resources.percentage
+import whosintoday.shared.generated.resources.percentage_present
+import whosintoday.shared.generated.resources.present
+import whosintoday.shared.generated.resources.search_by_name
+import whosintoday.shared.generated.resources.search_for_a_member_to_see_their_attendance
+import whosintoday.shared.generated.resources.statistics
+import whosintoday.shared.generated.resources.statistics_calculation
 
 @Composable
 internal fun StatisticsScreen(
@@ -27,8 +53,8 @@ internal fun StatisticsScreen(
     onSearch: (String) -> Unit,
     onMemberSelect: (Long) -> Unit,
 ) {
-    Heading("Statistics")
-    Label("Completed events", Modifier.padding(top = 4.dp), size = 13, color = muted)
+    Heading(stringResource(Res.string.statistics))
+    Label(stringResource(Res.string.completed_events), Modifier.padding(top = 4.dp), size = 13, color = muted)
     Row(
         Modifier.padding(top = 14.dp).fillMaxWidth().selectableGroup()
             .background(soft, RoundedCornerShape(10.dp)).padding(4.dp),
@@ -42,7 +68,7 @@ internal fun StatisticsScreen(
                     .selectable(selected, role = Role.Tab, onClick = { onPanelChange(panel) }),
                 contentAlignment = Alignment.Center,
             ) {
-                Label(panel.label, weight = if (selected) 750 else 400, color = accent)
+                Label(stringResource(panel.label), weight = if (selected) 750 else 400, color = accent)
             }
         }
     }
@@ -64,18 +90,18 @@ private fun OverallAttendance(percentage: Int) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Label("Overall attendance", Modifier.weight(1f), size = 13, color = accent)
-        Label("$percentage%", size = 28, weight = 750, color = accent)
+        Label(stringResource(Res.string.overall_attendance), Modifier.weight(1f), size = 13, color = accent)
+        Label(stringResource(Res.string.percentage, percentage), size = 28, weight = 750, color = accent)
     }
 }
 
 @Composable
 private fun MemberStatistics(state: StatisticsViewState, onSearch: (String) -> Unit, onMemberSelect: (Long) -> Unit) {
     val focus = LocalFocusManager.current
-    StatisticsHeading("Member attendance")
-    Field("Search by name", state.query, onSearch)
+    StatisticsHeading(stringResource(Res.string.member_attendance))
+    Field(stringResource(Res.string.search_by_name), state.query, onSearch)
     if (state.query.isNotBlank() && state.matches.isEmpty()) {
-        Label("No matching members.", size = 13, color = muted)
+        Label(stringResource(Res.string.no_matching_members), size = 13, color = muted)
     }
     Rows(state.matches) { member ->
         ListRow(
@@ -85,14 +111,14 @@ private fun MemberStatistics(state: StatisticsViewState, onSearch: (String) -> U
             },
         ) {
             Label(member.name, Modifier.weight(1f), weight = 620)
-            if (!member.active) Label("Archived", size = 12, color = muted)
+            if (!member.active) Label(stringResource(Res.string.archived), size = 12, color = muted)
         }
     }
 
     val member = state.member
     val history = state.history
     if (member == null || history == null) {
-        if (state.query.isBlank()) Label("Search for a member to see their attendance.", size = 13, color = muted)
+        if (state.query.isBlank()) Label(stringResource(Res.string.search_for_a_member_to_see_their_attendance), size = 13, color = muted)
         return
     }
     val shape = RoundedCornerShape(12.dp)
@@ -100,36 +126,35 @@ private fun MemberStatistics(state: StatisticsViewState, onSearch: (String) -> U
         Modifier.padding(top = 12.dp).fillMaxWidth().background(surface, shape)
             .border(1.dp, line, shape).padding(12.dp),
     ) {
-        Label(if (member.active) member.name else "${member.name} · Archived", weight = 750)
+        Label(if (member.active) member.name else stringResource(Res.string.archived_member_name, member.name), weight = 750)
         val rate = history.percentage
         if (rate == null) {
-            Label("No completed events included this member.", size = 13, color = muted)
+            Label(stringResource(Res.string.no_completed_events_included_this_member), size = 13, color = muted)
         } else {
-            Label("$rate% present", size = 23, weight = 750, color = accent)
+            Label(stringResource(Res.string.percentage_present, stringResource(Res.string.percentage, rate)), size = 23, weight = 750, color = accent)
             val total = history.absent.size + history.present.size
-            val eventLabel = if (total == 1) "event" else "events"
-            Label("Based on $total completed $eventLabel that included this member.", size = 13, color = muted)
-            StatisticsHistoryGroup("Absent", history.absent)
-            StatisticsHistoryGroup("Present", history.present)
+            Label(pluralStringResource(Res.plurals.member_completed_events, total, total), size = 13, color = muted)
+            StatisticsHistoryGroup(stringResource(Res.string.absent), history.absent)
+            StatisticsHistoryGroup(stringResource(Res.string.present), history.present)
         }
     }
 }
 
 @Composable
 private fun StatisticsHistoryGroup(status: String, events: List<Event>) {
-    StatisticsHeading("$status · ${events.size}")
+    StatisticsHeading(stringResource(Res.string.group_count, status, events.size))
     Rows(events) { event ->
         ListRow(Modifier) {
-            Label("${event.dateLabel.fullLabel} ${event.dateLabel.year}", size = 13)
+            Label(event.dateLabel.fullLabel(includeYear = true), size = 13)
         }
     }
 }
 
 @Composable
 private fun EventChart(events: List<EventStatistic>, axisMax: Int) {
-    StatisticsHeading("Attendance by event")
+    StatisticsHeading(stringResource(Res.string.attendance_by_event))
     if (events.isEmpty()) {
-        Label("No completed events yet.", size = 13, color = muted)
+        Label(stringResource(Res.string.no_completed_events_yet), size = 13, color = muted)
         return
     }
     val shape = RoundedCornerShape(12.dp)
@@ -137,7 +162,7 @@ private fun EventChart(events: List<EventStatistic>, axisMax: Int) {
         Modifier.padding(top = 8.dp).fillMaxWidth().background(surface, shape)
             .border(1.dp, line, shape).padding(10.dp),
     ) {
-        Label("Event", size = 11, color = muted)
+        Label(stringResource(Res.string.event), size = 11, color = muted)
         events.forEach { event ->
             Row(
                 Modifier.fillMaxWidth().heightIn(min = 34.dp),
@@ -145,15 +170,16 @@ private fun EventChart(events: List<EventStatistic>, axisMax: Int) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Label(event.date, Modifier.width(80.dp), size = 11, color = muted)
+                val presentDescription = pluralStringResource(Res.plurals.people_present_count, event.present, event.present)
                 Box(
                     Modifier.weight(1f).height(14.dp).clip(RoundedCornerShape(4.dp)).background(soft)
-                        .semantics { contentDescription = "${event.present} people present" },
+                        .semantics { contentDescription = presentDescription },
                 ) {
                     val fraction = event.present.toFloat() / axisMax.coerceAtLeast(1)
                     Box(Modifier.fillMaxHeight().fillMaxWidth(fraction).background(accent))
                 }
                 Label(
-                    event.percentage?.let { "$it%" } ?: "—",
+                    event.percentage?.let { stringResource(Res.string.percentage, it) } ?: "—",
                     Modifier.width(48.dp).clip(RoundedCornerShape(99.dp)).background(soft).padding(vertical = 3.dp),
                     size = 12,
                     weight = 750,
@@ -175,11 +201,11 @@ private fun EventChart(events: List<EventStatistic>, axisMax: Int) {
                     Label(axisMax.toString(), Modifier.align(Alignment.CenterEnd), size = 11, color = muted)
                 }
             }
-            Label("People present", Modifier.fillMaxWidth(), size = 11, color = muted, align = TextAlign.Center)
+            Label(stringResource(Res.string.people_present), Modifier.fillMaxWidth(), size = 11, color = muted, align = TextAlign.Center)
         }
     }
     Label(
-        "Each percentage uses its event’s roster. Overall attendance uses all roster spots across completed events.",
+        stringResource(Res.string.statistics_calculation),
         Modifier.padding(top = 8.dp),
         size = 13,
         color = muted,

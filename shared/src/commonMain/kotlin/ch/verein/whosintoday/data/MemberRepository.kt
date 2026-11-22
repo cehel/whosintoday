@@ -38,9 +38,9 @@ internal class MemberRepository(private val database: SQLiteConnection) {
 
     private fun validatedName(name: String): String {
         val trimmed = name.trim()
-        require(trimmed.isNotEmpty()) { "Enter a name." }
-        require(trimmed.length <= 100) { "Use 100 characters or fewer." }
-        require(trimmed.none { it.isISOControl() }) { "Enter a name without control characters." }
+        if (trimmed.isEmpty()) throw EmptyMemberName()
+        if (trimmed.length > 100) throw LongMemberName()
+        if (trimmed.any { it.isISOControl() }) throw InvalidMemberName()
         return trimmed
     }
 
@@ -54,3 +54,9 @@ internal class MemberRepository(private val database: SQLiteConnection) {
 
     private fun SQLiteStatement.readMember() = Member(getLong(0), getText(1), getLong(2) != 0L)
 }
+
+internal class EmptyMemberName : IllegalArgumentException()
+
+internal class LongMemberName : IllegalArgumentException()
+
+internal class InvalidMemberName : IllegalArgumentException()

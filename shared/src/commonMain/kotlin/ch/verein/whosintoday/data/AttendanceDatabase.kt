@@ -20,10 +20,21 @@ internal fun openAttendanceDatabase(path: String): SQLiteConnection {
     }
 }
 
+internal fun <T> SQLiteConnection.writeTransaction(block: () -> T): T {
+    execSQL("BEGIN IMMEDIATE")
+    try {
+        val result = block()
+        execSQL("COMMIT")
+        return result
+    } catch (failure: Throwable) {
+        runCatching { execSQL("ROLLBACK") }.onFailure(failure::addSuppressed)
+        throw failure
+    }
+}
+
 private fun migrate(connection: SQLiteConnection) {
     // Lock before reading user_version so concurrent openers see the committed schema.
-    connection.execSQL("BEGIN IMMEDIATE")
-    try {
+    connection.writeTransaction {
         val version = connection.prepare("PRAGMA user_version").use {
             check(it.step())
             it.getInt(0)
@@ -35,10 +46,6 @@ private fun migrate(connection: SQLiteConnection) {
             createAttendanceTables(connection)
             connection.execSQL("PRAGMA user_version = $SCHEMA_VERSION")
         }
-        connection.execSQL("COMMIT")
-    } catch (failure: Throwable) {
-        runCatching { connection.execSQL("ROLLBACK") }.onFailure(failure::addSuppressed)
-        throw failure
     }
 }
 

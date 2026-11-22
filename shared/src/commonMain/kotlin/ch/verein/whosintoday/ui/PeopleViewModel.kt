@@ -3,6 +3,7 @@ package ch.verein.whosintoday.ui
 import androidx.lifecycle.ViewModel
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteException
+import ch.verein.whosintoday.data.EventRepository
 import ch.verein.whosintoday.data.MemberRepository
 import ch.verein.whosintoday.data.openAttendanceDatabase
 import ch.verein.whosintoday.domain.Member
@@ -19,9 +20,9 @@ internal data class PeopleViewState(
 internal class PeopleViewModel private constructor(
     private val database: SQLiteConnection,
     private val repository: MemberRepository,
-    members: List<Member>,
+    val events: EventRepository,
 ) : ViewModel() {
-    private val state = MutableStateFlow(PeopleViewState(members))
+    private val state = MutableStateFlow(PeopleViewState(repository.list()))
     val viewState = state.asStateFlow()
 
     fun selectMember(member: Member) {
@@ -80,15 +81,28 @@ internal class PeopleViewModel private constructor(
             val database = openAttendanceDatabase(databasePath)
             try {
                 val repository = MemberRepository(database)
-                if (sample) {
-                    listOf("Amélie Rey", "Jonas Berger", "Lea Imhof", "Luca Morel", "Mia Arnold", "Noé Favre")
-                        .forEach { repository.add(it) }
-                }
-                return PeopleViewModel(database, repository, repository.list())
+                val events = EventRepository(database)
+                if (sample) seedSample(repository, events)
+                return PeopleViewModel(database, repository, events)
             } catch (failure: Throwable) {
                 runCatching { database.close() }.onFailure(failure::addSuppressed)
                 throw failure
             }
+        }
+
+        private fun seedSample(members: MemberRepository, events: EventRepository) {
+            val roster = listOf("Amélie Rey", "Jonas Berger", "Lea Imhof", "Luca Morel", "Mia Arnold", "Noé Favre")
+                .map { members.add(it) }
+
+            fun seed(date: String, vararg present: Int, closed: Boolean = true) {
+                val event = events.start(date)
+                present.forEach { events.setPresent(event, roster[it].id, true) }
+                if (closed) events.finish(date)
+            }
+
+            seed(SAMPLE_DATE, 0, 2, closed = false)
+            seed("2026-11-04", 0, 1, 3, 5)
+            seed("2026-10-21", 0, 1, 2, 4, 5)
         }
     }
 }

@@ -1,5 +1,6 @@
 package ch.verein.whosintoday.ui
 
+import ch.verein.whosintoday.domain.Event
 import ch.verein.whosintoday.domain.Member
 
 internal fun attendanceCsv(members: List<Member>, events: List<Event>): String {

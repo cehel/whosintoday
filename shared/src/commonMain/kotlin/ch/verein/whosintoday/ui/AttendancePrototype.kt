@@ -62,7 +62,14 @@ internal fun AttendancePrototype(peopleViewModel: PeopleViewModel, attendanceVie
                         onSelect = peopleViewModel::selectMember,
                     )
 
-                    state.screen == AppScreen.Export -> ExportScreen(attendanceCsv(sortedMembers, state.events), state.message)
+                    state.screen == AppScreen.Export -> {
+                        val csv = attendanceCsv(sortedMembers, state.events)
+                        ExportScreen(csv, state.message)
+                        TextAction("Copy CSV") {
+                            clipboard.setText(AnnotatedString(csv))
+                            attendanceViewModel.csvCopied()
+                        }
+                    }
                 }
             }
         }
@@ -84,9 +91,8 @@ internal fun AttendancePrototype(peopleViewModel: PeopleViewModel, attendanceVie
 
             state.screen == AppScreen.Events && !state.newEvent -> Footer("+ New event", onClick = attendanceViewModel::showNewEvent)
 
-            state.screen == AppScreen.Export -> Footer("Copy sample CSV") {
-                clipboard.setText(AnnotatedString(attendanceCsv(sortedMembers, state.events)))
-                attendanceViewModel.csvCopied()
+            state.screen == AppScreen.Export && attendanceViewModel.canSaveCsv -> Footer("Save CSV") {
+                attendanceViewModel.saveCsv(sortedMembers)
             }
         }
 

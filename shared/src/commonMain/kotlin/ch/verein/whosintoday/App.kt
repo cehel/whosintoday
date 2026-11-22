@@ -5,6 +5,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ch.verein.whosintoday.data.ATTENDANCE_CSV_NAME
 import ch.verein.whosintoday.ui.AttendancePrototype
 import ch.verein.whosintoday.ui.AttendanceViewModel
 import ch.verein.whosintoday.ui.PeopleViewModel
@@ -29,7 +30,8 @@ private fun AttendanceApp(databasePath: String, sample: Boolean) {
     }
     // Both ViewModels live in the same store and share the connection owned by PeopleViewModel.
     val attendance: AttendanceViewModel = viewModel(key = "attendance:$databasePath") {
-        AttendanceViewModel(people.events, sample)
+        val csvPath = if (sample) null else databasePath.substringBeforeLast('/') + "/" + ATTENDANCE_CSV_NAME
+        AttendanceViewModel(people.events, sample, csvPath)
     }
     MaterialTheme(
         colorScheme = lightColorScheme(

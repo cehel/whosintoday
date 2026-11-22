@@ -14,11 +14,18 @@ import androidx.compose.ui.unit.sp
 @Composable
 internal fun ExportScreen(csv: String, message: String) {
     Heading("Export attendance")
-    Label("Completed events · 1 present · 0 absent · blank outside the event roster",
-        color = muted, modifier = Modifier.padding(top = 8.dp, bottom = 12.dp))
+    Label(
+        "Completed events · 1 present · 0 absent · blank outside the event roster",
+        color = muted,
+        modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
+    )
     val shape = RoundedCornerShape(10.dp)
-    Text(csv, Modifier.fillMaxWidth().background(surface, shape).border(1.dp, line, shape)
-        .padding(12.dp), color = ink,
-        style = body.copy(fontFamily = FontFamily.Monospace, fontSize = 12.sp, lineHeight = 18.sp))
+    Text(
+        csv,
+        Modifier.fillMaxWidth().background(surface, shape).border(1.dp, line, shape)
+            .padding(12.dp),
+        color = ink,
+        style = body.copy(fontFamily = FontFamily.Monospace, fontSize = 12.sp, lineHeight = 18.sp),
+    )
     Status(message)
 }

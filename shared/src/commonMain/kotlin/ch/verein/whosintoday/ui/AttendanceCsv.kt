@@ -8,13 +8,15 @@ internal fun attendanceCsv(members: List<Member>, events: List<Event>): String {
     return buildList {
         add(listOf("Name") + completed.map { it.date })
         roster.forEach { member ->
-            add(listOf(member.name) + completed.map { event ->
-                when (event.attendance[member.id]) {
-                    true -> "1"
-                    false -> "0"
-                    null -> ""
-                }
-            })
+            add(
+                listOf(member.name) + completed.map { event ->
+                    when (event.attendance[member.id]) {
+                        true -> "1"
+                        false -> "0"
+                        null -> ""
+                    }
+                },
+            )
         }
     }.joinToString("\r\n") { row -> row.joinToString(",") { csvCell(it) } }
 }

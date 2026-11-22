@@ -14,8 +14,12 @@ internal fun NewEventScreen(
 ) {
     Heading("New event")
     Field("Event date", dateInput, onDateChange)
-    Label("Each date has one attendance record.", size = 13, color = muted,
-        modifier = Modifier.padding(bottom = 10.dp))
+    Label(
+        "Each date has one attendance record.",
+        size = 13,
+        color = muted,
+        modifier = Modifier.padding(bottom = 10.dp),
+    )
     Primary("Start check-in", onStart)
     Status(message)
 }

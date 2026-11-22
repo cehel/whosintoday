@@ -12,7 +12,7 @@ class AttendanceDatabaseTest {
     @Test
     fun freshDatabaseEnforcesAttendanceReferencesAndUniqueness() {
         openAttendanceDatabase(":memory:").use { database ->
-            assertEquals(schemaVersion, database.intValue("PRAGMA user_version"))
+            assertEquals(SCHEMA_VERSION, database.intValue("PRAGMA user_version"))
             database.execSQL("INSERT INTO members (id, name) VALUES (1, 'Amélie')")
             assertEquals(1, database.intValue("SELECT active FROM members WHERE id = 1"))
             assertFailsWith<SQLiteException> {
@@ -41,8 +41,13 @@ class AttendanceDatabaseTest {
         openAttendanceDatabase(":memory:").use { database ->
             database.execSQL("INSERT INTO events (event_date) VALUES ('2024-02-29'), ('2026-03-29')")
             val invalidDates = listOf(
-                "0000-01-01", "1900-02-29", "2026-04-31", "2026-13-01", "2026-03-00",
-                "2026-3-29", "2026-03-29T00:00:00+01:00",
+                "0000-01-01",
+                "1900-02-29",
+                "2026-04-31",
+                "2026-13-01",
+                "2026-03-00",
+                "2026-3-29",
+                "2026-03-29T00:00:00+01:00",
             )
             for (date in invalidDates) {
                 assertFailsWith<SQLiteException>(date) {
@@ -64,7 +69,7 @@ class AttendanceDatabaseTest {
             database.execSQL("UPDATE members SET active = 0 WHERE id = 7")
         }
         openAttendanceDatabase(path).use { database ->
-            assertEquals(schemaVersion, database.intValue("PRAGMA user_version"))
+            assertEquals(SCHEMA_VERSION, database.intValue("PRAGMA user_version"))
             assertEquals(0, database.intValue("SELECT active FROM members WHERE id = 7"))
             assertEquals(1, database.intValue("SELECT present FROM attendance WHERE member_id = 7"))
             assertEquals(1, database.intValue("SELECT closed FROM events WHERE event_date = '2026-11-18'"))

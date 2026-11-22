@@ -21,6 +21,10 @@ Use the run configurations provided by the run widget in your IDE's toolbar. You
 
 ### Running tests
 
+Run `./scripts/pre-pr.sh` before opening a pull request. It runs ktlint and the Android host, Android device, and iOS simulator test suites. For a complete run, connect an Android device or start an emulator and use an Apple Silicon Mac with Xcode and an iOS simulator runtime. The script exits with a nonzero status if Gradle fails or the host cannot run the iOS simulator tests.
+
+Run `./gradlew ktlintCheck` to check Kotlin formatting or `./gradlew ktlintFormat` to apply fixes.
+
 Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 
 - Android tests: `./gradlew :shared:testAndroidHostTest`

@@ -26,11 +26,15 @@ internal fun CheckInScreen(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Label(when {
-            editing -> "Editing attendance"
-            current.closed -> "Completed event"
-            else -> "Check in attendees"
-        }, color = muted, modifier = Modifier.weight(1f).padding(end = 10.dp))
+        Label(
+            when {
+                editing -> "Editing attendance"
+                current.closed -> "Completed event"
+                else -> "Check in attendees"
+            },
+            color = muted,
+            modifier = Modifier.weight(1f).padding(end = 10.dp),
+        )
         Badge(current.countLabel)
     }
     Box(
@@ -48,7 +52,9 @@ internal fun CheckInScreen(
                 .toggleable(checked, role = Role.Checkbox) { isPresent ->
                     onAttendanceChange(member.id, isPresent)
                 }
-        } else Modifier
+        } else {
+            Modifier
+        }
         ListRow(interaction) {
             Row(
                 Modifier.weight(1f),
@@ -57,7 +63,8 @@ internal fun CheckInScreen(
             ) {
                 Box(
                     Modifier.size(30.dp).background(
-                        if (canMark && checked) surface else soft, CircleShape,
+                        if (canMark && checked) surface else soft,
+                        CircleShape,
                     ),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -67,8 +74,11 @@ internal fun CheckInScreen(
                 }
                 Label(member.name, weight = 620)
             }
-            if (canMark) CheckMark(checked)
-            else Label(if (checked) "Present" else "Absent", size = 12, color = muted)
+            if (canMark) {
+                CheckMark(checked)
+            } else {
+                Label(if (checked) "Present" else "Absent", size = 12, color = muted)
+            }
         }
     }
 }

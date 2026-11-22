@@ -1,10 +1,13 @@
 package ch.verein.whosintoday.ui
 
 internal enum class AppScreen(val label: String) {
-    CheckIn("Check-in"), Events("Events"), People("People"), Export("Export"),
+    CheckIn("Check-in"),
+    Events("Events"),
+    People("People"),
+    Export("Export"),
 }
 
-internal const val sampleDate = "2026-11-18"
+internal const val SAMPLE_DATE = "2026-11-18"
 private val months = listOf(
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",

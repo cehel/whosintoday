@@ -48,6 +48,12 @@
         .chart-rate{justify-self:end;padding:2px 5px;border-radius:99px;background:var(--soft);color:var(--accent);font-size:.72rem;font-weight:750;font-variant-numeric:tabular-nums}
         .overall-card{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--accent)}
         .overall-card strong{font-size:1.85rem;line-height:1.1}.overall-card span{font-size:.85rem}
+        .event-notes{margin:14px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+        .notes-header{display:flex;align-items:center;justify-content:space-between;gap:12px}.notes-header h4{margin:0}
+        .notes-copy{white-space:pre-wrap;overflow-wrap:anywhere}.notes-empty{font-size:.85rem;color:var(--muted)}
+        .notes-form textarea{display:block;width:100%;min-height:96px;resize:vertical;margin:5px 0 10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}
+        .notes-form textarea:focus-visible{outline:3px solid #ad531f;outline-offset:2px}
+        .notes-actions{display:flex;align-items:center;gap:16px}.notes-actions .primary{width:auto;padding-inline:14px}
         @media(max-width:500px){main{width:min(100% - 28px,451px);margin-top:28px}}
     </style>
 </head>
@@ -58,7 +64,7 @@
     </header>
     <section class="proposal">
         <h2>Events first</h2>
-        <p>Open <strong>Statistics</strong> to explore event and member attendance.</p>
+        <p>Open an event to add or edit notes. The 4 November event has sample notes.</p>
         <div id="events-mockup" class="phone" aria-label="Events first prototype"></div>
     </section>
 </main>
@@ -78,12 +84,13 @@
       const snapshot = present => Object.fromEntries(members.filter(m => m.active).map(m => [m.id, present.includes(m.id)]));
       const events = [
         {date:sampleDate, closed:false, attendance:snapshot([0,2])},
-        {date:'2026-11-04', closed:true, attendance:snapshot([0,1,3,5])},
+        {date:'2026-11-04', closed:true, attendance:snapshot([0,1,3,5]), notes:'We met in the small hall.\nBring the spare key next time.'},
         {date:'2026-10-21', closed:true, attendance:snapshot([0,1,2,4,5])}
       ];
       let page = 'events';
       let current = null;
       let editing = false;
+      let notesDraft = null;
       let memberId = null;
       let message = '';
       let statsPanel = 'events';
@@ -170,6 +177,21 @@
           '<p class="stats-note">Each percentage uses its event’s roster. Overall attendance uses all roster spots across completed events.</p>' +
           '</section>';
       };
+      const notesForm = () => '<form class="notes-form" data-form="notes"><label for="' + prefix +
+        'notes">Event notes</label><textarea id="' + prefix + 'notes" name="notes" rows="4">' + html(notesDraft) +
+        '</textarea><div class="notes-actions"><button class="primary">Save notes</button>' +
+        '<button type="button" class="text-button" data-action="cancel-notes">Cancel</button></div></form>';
+
+      const notesCard = () => {
+        if (notesDraft !== null) return '<section class="event-notes">' + notesForm() + '</section>';
+        const notes = current.notes;
+        return '<section class="event-notes"><div class="notes-header"><h4>Event notes</h4>' +
+          '<button id="' + prefix + 'open-notes" class="text-button" data-action="edit-notes">' +
+          (notes ? 'Edit notes' : 'Add notes') + '</button></div>' +
+          (notes ? '<p class="notes-copy">' + html(notes) + '</p>' : '<p class="notes-empty">No notes yet</p>') +
+          '</section>';
+      };
+
       function render(focusId) {
         let body = '', footer = '';
         if (page === 'detail' && current) {
@@ -191,7 +213,7 @@
                   (group.length ? memberList(group) : '');
               }).join('')
             : memberList(roster);
-          body = '<h3>' + shortDate(current.date) + '</h3><div class="summary"><span>' + (editing ? 'Editing attendance' : current.closed ? 'Completed event' : 'Check in attendees') + '</span><span class="count" role="status">' + present + ' / ' + total + ' present</span></div><div class="progress" aria-hidden="true"><span style="width:' + (total ? 100 * present / total : 0) + '%"></span></div>' + rosterMarkup;
+          body = '<h3>' + shortDate(current.date) + '</h3><div class="summary"><span>' + (editing ? 'Editing attendance' : current.closed ? 'Completed event' : 'Check in attendees') + '</span><span class="count" role="status">' + present + ' / ' + total + ' present</span></div><div class="progress" aria-hidden="true"><span style="width:' + (total ? 100 * present / total : 0) + '%"></span></div>' + notesCard() + rosterMarkup;
           footer = current.closed && !editing ? action('edit','Edit attendance') : action('finish', editing ? 'Done editing' : 'Finish check-in', current.closed ? 'Changes apply immediately.' : 'Unchecked members count as absent when you finish.');
         } else if (page === 'events') {
           const open = events.filter(e => !e.closed).sort((a,b) => b.date.localeCompare(a.date));
@@ -226,7 +248,16 @@
         if (focusId) document.getElementById(focusId)?.focus();
       }
 
+      const closeNotes = () => {
+        notesDraft = null;
+        render(prefix + 'open-notes');
+      };
+
       root.addEventListener('input', event => {
+        if (event.target.id === prefix + 'notes') {
+          notesDraft = event.target.value;
+          return;
+        }
         if (event.target.id !== prefix + 'stats-search') return;
         statsQuery = event.target.value;
         root.querySelector('[data-stats-results]').innerHTML = searchResults();
@@ -245,6 +276,11 @@
         event.preventDefault();
         const form = new FormData(event.target);
         const status = event.target.querySelector('.status');
+        if (kind === 'notes') {
+          current.notes = form.get('notes').trim();
+          closeNotes();
+          return;
+        }
         if (kind === 'date') {
           const date = form.get('date');
           const existing = events.find(e => e.date === date);
@@ -285,7 +321,12 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
             return;
           }
-          case 'open': current = events.find(e => e.date === button.dataset.date); page = 'detail'; break;
+          case 'open': notesDraft = null; current = events.find(e => e.date === button.dataset.date); page = 'detail'; break;
+          case 'edit-notes':
+            notesDraft = current.notes ?? '';
+            render(prefix + 'notes');
+            return;
+          case 'cancel-notes': closeNotes(); return;
           case 'edit': editing = true; render(); return;
           case 'finish': current.closed = true; break;
           case 'people': memberId = null; page = command; break;
@@ -305,6 +346,7 @@
           }
           default: page = command;
         }
+        if (page !== 'detail') notesDraft = null;
         editing = false;
         render();
       });

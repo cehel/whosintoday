@@ -108,4 +108,10 @@
     <string name="member_archived">Mitglied archiviert.</string>
     <string name="member_restored">Mitglied wiederhergestellt.</string>
     <string name="could_not_save_the_member">Das Mitglied konnte nicht gespeichert werden. Versuche es nochmals.</string>
+    <string name="event_notes">Veranstaltungsnotizen</string>
+    <string name="add_notes">Notizen hinzufügen</string>
+    <string name="edit_notes">Notizen bearbeiten</string>
+    <string name="no_notes_yet">Noch keine Notizen</string>
+    <string name="save_notes">Notizen speichern</string>
+    <string name="could_not_save_notes">Die Notizen konnten nicht gespeichert werden. Versuche es nochmals.</string>
 </resources>

@@ -15,7 +15,12 @@ internal fun parseDate(value: String): CalendarDate? {
     return CalendarDate(year, month, day).takeIf { day in 1..days }
 }
 
-internal data class Event(val date: String, val attendance: Map<Long, Boolean>, val closed: Boolean = false) {
+internal data class Event(
+    val date: String,
+    val attendance: Map<Long, Boolean>,
+    val closed: Boolean = false,
+    val notes: String = "",
+) {
     val present get() = attendance.values.count { it }
     val total get() = attendance.size
 }

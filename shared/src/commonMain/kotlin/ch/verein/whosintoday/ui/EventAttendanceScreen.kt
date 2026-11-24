@@ -1,11 +1,16 @@
 package ch.verein.whosintoday.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
@@ -22,16 +27,22 @@ import ch.verein.whosintoday.domain.Member
 import org.jetbrains.compose.resources.stringResource
 import whosintoday.shared.generated.resources.Res
 import whosintoday.shared.generated.resources.absent
+import whosintoday.shared.generated.resources.add_notes
 import whosintoday.shared.generated.resources.cancel
 import whosintoday.shared.generated.resources.check_in_attendees
 import whosintoday.shared.generated.resources.completed_event
+import whosintoday.shared.generated.resources.could_not_save_notes
 import whosintoday.shared.generated.resources.delete
 import whosintoday.shared.generated.resources.delete_event
 import whosintoday.shared.generated.resources.delete_event_confirmation
 import whosintoday.shared.generated.resources.delete_event_title
+import whosintoday.shared.generated.resources.edit_notes
 import whosintoday.shared.generated.resources.editing_attendance
+import whosintoday.shared.generated.resources.event_notes
 import whosintoday.shared.generated.resources.group_count
+import whosintoday.shared.generated.resources.no_notes_yet
 import whosintoday.shared.generated.resources.present
+import whosintoday.shared.generated.resources.save_notes
 
 @Composable
 internal fun EventAttendanceScreen(
@@ -40,6 +51,7 @@ internal fun EventAttendanceScreen(
     canMark: Boolean,
     sortedMembers: List<Member>,
     onAttendanceChange: (Long, Boolean) -> Unit,
+    notesCard: @Composable () -> Unit,
 ) {
     Heading(current.dateLabel.shortLabel())
     Row(
@@ -65,6 +77,7 @@ internal fun EventAttendanceScreen(
         val fraction = if (current.total == 0) 0f else current.present.toFloat() / current.total
         Box(Modifier.fillMaxHeight().fillMaxWidth(fraction).background(accent, CircleShape))
     }
+    notesCard()
     val roster = sortedMembers.filter { it.id in current.attendance }
     if (canMark) {
         Rows(roster) { member ->
@@ -83,6 +96,62 @@ internal fun EventAttendanceScreen(
         val (present, absent) = roster.partition { current.attendance[it.id] == true }
         AttendanceGroup(stringResource(Res.string.absent), absent)
         AttendanceGroup(stringResource(Res.string.present), present)
+    }
+}
+
+@Composable
+internal fun EventNotesCard(
+    notes: String,
+    draft: String?,
+    saveFailed: Boolean,
+    onEdit: () -> Unit,
+    onChange: (String) -> Unit,
+    onCancel: () -> Unit,
+    onSave: () -> Unit,
+) {
+    val shape = RoundedCornerShape(12.dp)
+    Column(
+        Modifier.fillMaxWidth().padding(bottom = 14.dp)
+            .background(surface, shape).border(1.dp, line, shape).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        val title = stringResource(Res.string.event_notes)
+        if (draft == null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Label(title, Modifier.weight(1f).semantics { heading() }, weight = 720)
+                TextButton(onClick = onEdit) {
+                    Text(stringResource(if (notes.isEmpty()) Res.string.add_notes else Res.string.edit_notes), color = accent)
+                }
+            }
+            if (notes.isEmpty()) {
+                Label(stringResource(Res.string.no_notes_yet), color = muted)
+            } else {
+                Label(notes)
+            }
+        } else {
+            OutlinedTextField(
+                value = draft,
+                onValueChange = onChange,
+                label = { Text(title) },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 5,
+                isError = saveFailed,
+                supportingText = if (saveFailed) {
+                    { Text(stringResource(Res.string.could_not_save_notes)) }
+                } else {
+                    null
+                },
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onSave, colors = ButtonDefaults.buttonColors(containerColor = accent)) {
+                    Text(stringResource(Res.string.save_notes))
+                }
+                TextButton(onClick = onCancel) {
+                    Text(stringResource(Res.string.cancel), color = accent)
+                }
+            }
+        }
     }
 }
 

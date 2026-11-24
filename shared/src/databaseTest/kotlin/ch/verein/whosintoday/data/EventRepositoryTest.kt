@@ -21,6 +21,7 @@ class EventRepositoryTest {
 
             val event = events.start(date)
             assertEquals(mapOf(first.id to false, second.id to false), event.attendance)
+            assertEquals(event.copy(notes = "Bring the spare key"), events.saveNotes(date, "Bring the spare key"))
             events.setPresent(event, first.id, true)
             events.setPresent(event, second.id, true)
             events.setPresent(event, second.id, false)
@@ -39,6 +40,7 @@ class EventRepositoryTest {
             val events = EventRepository(database)
             val reopened = events.start(date)
             assertEquals(originalRoster, reopened.attendance)
+            assertEquals("Bring the spare key", reopened.notes)
             assertEquals(reopened, events.list().single { it.date == date })
             assertEquals(false, reopened.closed)
             val completed = events.finish(date)
@@ -48,12 +50,18 @@ class EventRepositoryTest {
             val edited = events.setPresent(completed, originalRoster.keys.last(), true)
             assertTrue(edited.closed)
             assertEquals(originalRoster.keys.associateWith { true }, edited.attendance)
+            val notes = "Use the small hall.\nBring the spare key."
+            assertEquals(edited.copy(notes = notes), events.saveNotes(date, notes))
         }
 
         openAttendanceDatabase(path).use { database ->
-            val saved = EventRepository(database).list().single { it.date == date }
+            val events = EventRepository(database)
+            val saved = events.list().single { it.date == date }
             assertTrue(saved.closed)
             assertEquals(originalRoster.keys.associateWith { true }, saved.attendance)
+            assertEquals("Use the small hall.\nBring the spare key.", saved.notes)
+            assertEquals("", events.list().single { it.date != date }.notes)
+            assertEquals(saved.copy(notes = ""), events.saveNotes(date, ""))
         }
     }
 

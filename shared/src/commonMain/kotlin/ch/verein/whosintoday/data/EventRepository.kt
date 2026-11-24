@@ -63,6 +63,15 @@ internal class EventRepository(private val database: SQLiteConnection) {
         readEvents(date).single()
     }
 
+    fun saveNotes(date: String, notes: String): Event? = database.writeTransaction {
+        database.prepare("UPDATE events SET notes = ? WHERE event_date = ?").use {
+            it.bindText(1, notes)
+            it.bindText(2, date)
+            it.step()
+        }
+        readEvents(date).singleOrNull()
+    }
+
     fun delete(date: String) {
         database.prepare("DELETE FROM events WHERE event_date = ?").use {
             it.bindText(1, date)
@@ -72,7 +81,7 @@ internal class EventRepository(private val database: SQLiteConnection) {
 
     private fun readEvents(date: String? = null): List<Event> = database.prepare(
         """
-        SELECT events.event_date, events.closed, attendance.member_id, attendance.present
+        SELECT events.event_date, events.closed, attendance.member_id, attendance.present, events.notes
         FROM events LEFT JOIN attendance ON attendance.event_date = events.event_date
         WHERE ? IS NULL OR events.event_date = ?
         ORDER BY events.event_date DESC
@@ -92,7 +101,7 @@ internal class EventRepository(private val database: SQLiteConnection) {
             val eventDate = statement.getText(0)
             if (current?.date != eventDate) {
                 attendance = mutableMapOf()
-                current = Event(eventDate, attendance, closed = statement.getLong(1) != 0L)
+                current = Event(eventDate, attendance, closed = statement.getLong(1) != 0L, notes = statement.getText(4))
                 events.add(current)
             }
             if (!statement.isNull(2)) {

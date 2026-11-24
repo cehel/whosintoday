@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun AppBottomBar(selectedScreen: AppScreen, newEvent: Boolean, onNavigate: (AppScreen) -> Unit) {
@@ -30,7 +31,7 @@ internal fun AppBottomBar(selectedScreen: AppScreen, newEvent: Boolean, onNaviga
                 contentAlignment = Alignment.Center,
             ) {
                 Label(
-                    screen.label,
+                    stringResource(screen.label),
                     size = 13,
                     weight = if (selected) 750 else 400,
                     color = if (selected) accent else muted,

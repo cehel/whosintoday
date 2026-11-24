@@ -27,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun Label(
@@ -195,6 +197,6 @@ internal fun TextAction(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-internal fun Status(message: String) {
-    Label(message, Modifier.padding(top = 8.dp), size = 13, color = accent)
+internal fun Status(message: StringResource?) {
+    Label(message?.let { stringResource(it) }.orEmpty(), Modifier.padding(top = 8.dp), size = 13, color = accent)
 }

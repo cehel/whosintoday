@@ -19,6 +19,7 @@ class AttendanceDatabaseTest {
                 database.execSQL("UPDATE members SET active = 2 WHERE id = 1")
             }
             database.execSQL("INSERT INTO events (event_date) VALUES ('2026-11-18')")
+            assertEquals(1, database.intValue("SELECT count(*) FROM events WHERE notes = ''"))
             database.execSQL("INSERT INTO attendance (event_date, member_id) VALUES ('2026-11-18', 1)")
             assertEquals(0, database.intValue("SELECT present FROM attendance"))
             assertFailsWith<SQLiteException> {
@@ -61,20 +62,44 @@ class AttendanceDatabaseTest {
     }
 
     @Test
-    fun reopeningPreservesExistingAttendance() = withTemporaryDatabase { path ->
-        openAttendanceDatabase(path).use { database ->
+    fun upgradingFromVersionOnePreservesExistingAttendance() = withTemporaryDatabase { path ->
+        BundledSQLiteDriver().open(path).use { database ->
+            database.execSQL("CREATE TABLE members (id INTEGER PRIMARY KEY, name TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1)")
+            database.execSQL("CREATE TABLE events (event_date TEXT PRIMARY KEY NOT NULL, closed INTEGER NOT NULL DEFAULT 0)")
+            database.execSQL(
+                """
+                CREATE TABLE attendance (
+                    event_date TEXT NOT NULL REFERENCES events(event_date) ON DELETE CASCADE,
+                    member_id INTEGER NOT NULL REFERENCES members(id),
+                    present INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY (event_date, member_id)
+                )
+                """.trimIndent(),
+            )
+            database.execSQL("CREATE INDEX attendance_member_id ON attendance(member_id)")
             database.execSQL("INSERT INTO members (id, name) VALUES (7, 'Noé')")
-            database.execSQL("INSERT INTO events VALUES ('2026-11-18', 1)")
+            database.execSQL("INSERT INTO events (event_date, closed) VALUES ('2026-11-18', 1), ('2026-11-20', 0)")
             database.execSQL("INSERT INTO attendance VALUES ('2026-11-18', 7, 1)")
+            database.execSQL("INSERT INTO attendance VALUES ('2026-11-20', 7, 0)")
             database.execSQL("UPDATE members SET active = 0 WHERE id = 7")
+            database.execSQL("PRAGMA user_version = 1")
         }
         openAttendanceDatabase(path).use { database ->
             assertEquals(SCHEMA_VERSION, database.intValue("PRAGMA user_version"))
-            assertEquals(0, database.intValue("SELECT active FROM members WHERE id = 7"))
-            assertEquals(1, database.intValue("SELECT present FROM attendance WHERE member_id = 7"))
+            assertEquals(1, database.intValue("SELECT count(*) FROM members WHERE id = 7 AND name = 'Noé' AND active = 0"))
+            assertEquals(2, database.intValue("SELECT count(*) FROM events WHERE notes = ''"))
+            assertEquals(2, database.intValue("SELECT count(*) FROM attendance WHERE member_id = 7"))
+            assertEquals(1, database.intValue("SELECT present FROM attendance WHERE event_date = '2026-11-18' AND member_id = 7"))
+            assertEquals(0, database.intValue("SELECT present FROM attendance WHERE event_date = '2026-11-20' AND member_id = 7"))
             assertEquals(1, database.intValue("SELECT closed FROM events WHERE event_date = '2026-11-18'"))
+            assertEquals(0, database.intValue("SELECT closed FROM events WHERE event_date = '2026-11-20'"))
+            database.execSQL("UPDATE events SET notes = 'Bring the spare key' WHERE event_date = '2026-11-18'")
+        }
+        openAttendanceDatabase(path).use { database ->
+            assertEquals(1, database.intValue("SELECT count(*) FROM events WHERE notes = 'Bring the spare key'"))
             database.execSQL("DELETE FROM events WHERE event_date = '2026-11-18'")
-            assertEquals(0, database.intValue("SELECT count(*) FROM attendance"))
+            assertEquals(0, database.intValue("SELECT count(*) FROM attendance WHERE event_date = '2026-11-18'"))
+            assertEquals(1, database.intValue("SELECT count(*) FROM attendance WHERE event_date = '2026-11-20'"))
         }
     }
 

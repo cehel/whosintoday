@@ -40,7 +40,7 @@ internal fun AttendancePrototype(
     }
 
     Column(
-        Modifier.fillMaxSize().background(canvas)
+        Modifier.fillMaxSize().imePadding().background(canvas)
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
     ) {
         AppTopBar(newEvent = state.newEvent, eventAttendance = current != null) { navigate(AppScreen.Events) }
@@ -53,7 +53,17 @@ internal fun AttendancePrototype(
             ) {
                 when {
                     current != null -> {
-                        EventAttendanceScreen(current, state.editing, state.canMark, sortedMembers, attendanceViewModel::changeAttendance)
+                        EventAttendanceScreen(current, state.editing, state.canMark, sortedMembers, attendanceViewModel::changeAttendance) {
+                            EventNotesCard(
+                                notes = current.notes,
+                                draft = state.notesDraft,
+                                saveFailed = state.notesSaveFailed,
+                                onEdit = attendanceViewModel::editNotes,
+                                onChange = attendanceViewModel::changeNotes,
+                                onCancel = attendanceViewModel::cancelNotes,
+                                onSave = attendanceViewModel::saveNotes,
+                            )
+                        }
                         Status(state.message)
                         DeleteEventAction(
                             current,

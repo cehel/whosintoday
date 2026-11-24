@@ -5,7 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 
 internal const val DATABASE_NAME = "attendance.db"
-internal const val SCHEMA_VERSION = 1
+internal const val SCHEMA_VERSION = 2
 
 internal fun openAttendanceDatabase(path: String): SQLiteConnection {
     val connection = BundledSQLiteDriver().open(path)
@@ -44,6 +44,11 @@ private fun migrate(connection: SQLiteConnection) {
         }
         if (version == 0) {
             createAttendanceTables(connection)
+        }
+        if (version < 2) {
+            connection.execSQL("ALTER TABLE events ADD COLUMN notes TEXT NOT NULL DEFAULT ''")
+        }
+        if (version < SCHEMA_VERSION) {
             connection.execSQL("PRAGMA user_version = $SCHEMA_VERSION")
         }
     }

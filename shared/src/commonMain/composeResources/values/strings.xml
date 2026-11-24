@@ -108,4 +108,10 @@
     <string name="member_archived">Member archived.</string>
     <string name="member_restored">Member restored.</string>
     <string name="could_not_save_the_member">Could not save the member. Try again.</string>
+    <string name="event_notes">Event notes</string>
+    <string name="add_notes">Add notes</string>
+    <string name="edit_notes">Edit notes</string>
+    <string name="no_notes_yet">No notes yet</string>
+    <string name="save_notes">Save notes</string>
+    <string name="could_not_save_notes">Could not save notes. Try again.</string>
 </resources>

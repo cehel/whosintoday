@@ -28,6 +28,8 @@ internal data class AttendanceViewState(
     val eventDate: String? = null,
     val newEvent: Boolean = false,
     val editing: Boolean = false,
+    val notesDraft: String? = null,
+    val notesSaveFailed: Boolean = false,
     val confirmingDelete: Boolean = false,
     val message: StringResource? = null,
 ) {
@@ -53,6 +55,8 @@ internal class AttendanceViewModel(
             eventDate = null,
             newEvent = false,
             editing = false,
+            notesDraft = null,
+            notesSaveFailed = false,
             confirmingDelete = false,
             message = null,
         )
@@ -91,8 +95,46 @@ internal class AttendanceViewModel(
             eventDate = date,
             newEvent = false,
             editing = false,
+            notesDraft = null,
+            notesSaveFailed = false,
             confirmingDelete = false,
             message = null,
+        )
+    }
+
+    fun editNotes() {
+        val current = attendance.value
+        val event = current.currentEvent ?: return
+        attendance.value = current.copy(notesDraft = event.notes, notesSaveFailed = false)
+    }
+
+    fun changeNotes(notes: String) {
+        val current = attendance.value
+        if (current.notesDraft == null) return
+        attendance.value = current.copy(notesDraft = notes, notesSaveFailed = false)
+    }
+
+    fun cancelNotes() {
+        attendance.value = attendance.value.copy(notesDraft = null, notesSaveFailed = false)
+    }
+
+    fun saveNotes() {
+        val current = attendance.value
+        val event = current.currentEvent ?: return
+        val draft = current.notesDraft ?: return
+        val updated = try {
+            events.saveNotes(event.date, draft.trim())
+        } catch (_: SQLiteException) {
+            null
+        }
+        if (updated == null) {
+            attendance.value = current.copy(notesSaveFailed = true)
+            return
+        }
+        attendance.value = current.copy(
+            events = current.events.map { if (it.date == updated.date) updated else it },
+            notesDraft = null,
+            notesSaveFailed = false,
         )
     }
 
@@ -120,6 +162,8 @@ internal class AttendanceViewModel(
             events = current.events.filterNot { it.date == event.date },
             eventDate = null,
             editing = false,
+            notesDraft = null,
+            notesSaveFailed = false,
             confirmingDelete = false,
             message = null,
         )
